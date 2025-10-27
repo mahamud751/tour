@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Tour {
+  id           String         @id @default(cuid())
+  title        String
+  description  String
+  photo        String
+  price        Float
+  city         String
+  address      String
+  distance     String
+  maxGroupSize Int
+  duration     String?
+  season       String?
+  featured     Boolean?
+  avgRating    Float
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  itinerary    ItineraryDay[]
+  orders       Order[]
+  reviews      Review[]
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  username   String
+  reviewText String
+  rating     Int
+  createdAt  DateTime @default(now())
+  tourId     String
+  tour       Tour     @relation(fields: [tourId], references: [id])
+}
+
+model ItineraryDay {
+  id          String @id @default(cuid())
+  day         Int
+  title       String
+  description String
+  activities  Json
+  tourId      String
+  tour        Tour   @relation(fields: [tourId], references: [id])
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  userId     String
+  tourId     String
+  fullName   String
+  phone      String
+  guestSize  Int
+  bookAt     DateTime
+  totalPrice Float
+  status     OrderStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  tour       Tour        @relation(fields: [tourId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}

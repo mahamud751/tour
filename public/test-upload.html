@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test File Upload</title>
+  </head>
+  <body>
+    <h1>Test File Upload</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" id="fileInput" name="file" accept="image/*" required />
+      <button type="submit">Upload</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const fileInput = document.getElementById("fileInput");
+          const file = fileInput.files[0];
+
+          if (!file) {
+            document.getElementById("result").innerHTML =
+              "<p>Please select a file</p>";
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append("file", file);
+
+          try {
+            const response = await fetch("/api/upload", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              document.getElementById("result").innerHTML = `
+                        <p>Upload successful!</p>
+                        <p>URL: ${data.url}</p>
+                        <img src="${data.url}" style="max-width: 300px;">
+                    `;
+            } else {
+              document.getElementById(
+                "result"
+              ).innerHTML = `<p>Error: ${data.error}</p>`;
+            }
+          } catch (error) {
+            document.getElementById(
+              "result"
+            ).innerHTML = `<p>Error: ${error.message}</p>`;
+          }
+        });
+    </script>
+  </body>
+</html>
