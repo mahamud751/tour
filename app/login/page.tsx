@@ -49,6 +49,8 @@ export default function LoginPage() {
         // Store token in localStorage
         localStorage.setItem("token", data.token);
         toast.success("Login successful!");
+        // Dispatch auth change event
+        window.dispatchEvent(new Event("authChange"));
         // Redirect to dashboard
         router.push("/dashboard");
         router.refresh();

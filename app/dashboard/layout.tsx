@@ -52,6 +52,8 @@ export default function DashboardLayout({
   const handleLogout = () => {
     localStorage.removeItem("token");
     toast.success("Logged out successfully");
+    // Dispatch auth change event
+    window.dispatchEvent(new Event("authChange"));
     router.push("/login");
     router.refresh();
   };

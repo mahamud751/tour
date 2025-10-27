@@ -37,6 +37,26 @@ const Header = () => {
     if (token) {
       fetchCurrentUser(token);
     }
+
+    // Listen for auth events
+    const handleAuthChange = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        fetchCurrentUser(token);
+      } else {
+        setUser(null);
+      }
+    };
+
+    window.addEventListener("storage", handleAuthChange);
+
+    // Also listen for custom auth events
+    window.addEventListener("authChange", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("storage", handleAuthChange);
+      window.removeEventListener("authChange", handleAuthChange);
+    };
   }, []);
 
   const fetchCurrentUser = async (token: string) => {
@@ -63,6 +83,8 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setUser(null);
+    // Dispatch auth change event
+    window.dispatchEvent(new Event("authChange"));
     // Redirect to home if on a protected page
     if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
       window.location.href = "/";

@@ -64,6 +64,22 @@ export default function AdminDashboardPage() {
             totalRevenue: totalRevenue,
           }));
         }
+
+        // Fetch users
+        const usersResponse = await fetch("/api/admin/users", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const usersData = await usersResponse.json();
+
+        if (usersResponse.ok) {
+          setStats((prev) => ({
+            ...prev,
+            totalUsers: usersData.users.length,
+          }));
+        }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       }
@@ -107,9 +123,7 @@ export default function AdminDashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {stats.totalUsers || "N/A"}
-            </div>
+            <div className="text-2xl font-bold">{stats.totalUsers}</div>
           </CardContent>
         </Card>
         <Card>

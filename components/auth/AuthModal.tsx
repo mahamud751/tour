@@ -93,6 +93,9 @@ export const AuthModal = ({
           mode === "login" ? "Login successful!" : "Registration successful!"
         );
 
+        // Dispatch auth change event
+        window.dispatchEvent(new Event("authChange"));
+
         // Close modal and redirect to dashboard
         onClose();
         router.push("/dashboard");

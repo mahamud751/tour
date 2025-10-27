@@ -81,6 +81,8 @@ export default function AdminLayout({
   const handleLogout = () => {
     localStorage.removeItem("token");
     toast.success("Logged out successfully");
+    // Dispatch auth change event
+    window.dispatchEvent(new Event("authChange"));
     router.push("/login");
     router.refresh();
   };
@@ -97,6 +99,7 @@ export default function AdminLayout({
     { name: "Dashboard", href: "/admin", icon: Package2 },
     { name: "Manage Tours", href: "/admin/tours", icon: MapPin },
     { name: "All Orders", href: "/admin/orders", icon: Users },
+    { name: "Users", href: "/admin/users", icon: User },
     { name: "Profile", href: "/admin/profile", icon: User },
   ];
 

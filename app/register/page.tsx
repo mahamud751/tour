@@ -61,6 +61,8 @@ export default function RegisterPage() {
         // Store token in localStorage
         localStorage.setItem("token", data.token);
         toast.success("Registration successful!");
+        // Dispatch auth change event
+        window.dispatchEvent(new Event("authChange"));
         // Redirect to dashboard
         router.push("/dashboard");
         router.refresh();
