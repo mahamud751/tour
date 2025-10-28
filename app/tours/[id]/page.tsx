@@ -13,14 +13,15 @@ export default async function TourPage({ params }: TourPageProps) {
   const resolvedParams = await params;
   const { id } = resolvedParams;
 
+  // Use the current host for API calls in development
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3061}`;
+
   // Fetch the tour from our API
   let tour: Tour | null = null;
 
   try {
     const response = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-      }/api/tours/${id}`,
+      `${baseUrl}/api/tours/${id}`,
       {
         cache: "no-store",
       }
@@ -53,7 +54,9 @@ export async function generateMetadata({ params }: TourPageProps) {
   // In Next.js 16, we need to await the params Promise
   const resolvedParams = await params;
   const { id } = resolvedParams;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  
+  // Use the current host for API calls in development
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3061}`;
 
   // Fetch the tour from our API
   let tour: Tour | null = null;

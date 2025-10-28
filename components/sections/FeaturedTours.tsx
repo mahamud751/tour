@@ -14,7 +14,7 @@ export const FeaturedTours = async () => {
         process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
       }/api/tours/featured`,
       {
-        next: { revalidate: 3600 }, // Revalidate every hour
+        next: { revalidate: 0 }, // Disable caching for debugging
       }
     );
 

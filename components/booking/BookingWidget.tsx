@@ -17,38 +17,11 @@ interface BookingWidgetProps {
 
 interface BookingPayload {
   tourId: string;
-  tourTitle: string;
-  tourPrice: number;
-  date: string;
-  guests: number;
   fullName: string;
-  email: string;
   phone: string;
-  totalPrice: number;
-  bookedAt: string;
+  guestSize: number;
+  bookAt: string;
 }
-
-// Mock function to simulate API call
-const mockBookTour = async (_payload: BookingPayload): Promise<{ success: boolean; bookingId?: string; message?: string }> => {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  
-  // Simulate random success/failure
-  const isSuccess = Math.random() > 0.2; // 80% success rate
-  
-  if (isSuccess) {
-    return {
-      success: true,
-      bookingId: `BK-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-      message: 'Booking confirmed successfully!'
-    };
-  } else {
-    return {
-      success: false,
-      message: 'Booking failed. Please try again or contact support.'
-    };
-  }
-};
 
 export const BookingWidget = ({ tour }: BookingWidgetProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -101,15 +74,26 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
         return;
       }
 
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        toast.error("Authentication Required", {
+          description: "Please log in to book a tour.",
+        });
+        setIsLoading(false);
+        // Redirect to login page
+        window.location.href = '/login';
+        return;
+      }
+
       // Prepare booking data
       const bookingPayload: BookingPayload = {
         tourId: tour.id,
-        tourTitle: tour.title,
-        tourPrice: price,
-        ...bookingData,
-        guests: parseInt(bookingData.guests),
-        totalPrice: (price * parseInt(bookingData.guests)) + 49, // Including service fee
-        bookedAt: new Date().toISOString(),
+        fullName: bookingData.fullName,
+        phone: bookingData.phone,
+        guestSize: parseInt(bookingData.guests),
+        bookAt: bookingData.date,
       };
 
       console.log('Booking payload:', bookingPayload);
@@ -117,19 +101,28 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
       // Show loading toast
       const loadingToast = toast.loading('Processing your booking...');
 
-      // Simulate API call
-      const result = await mockBookTour(bookingPayload);
+      // Call the actual API endpoint
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(bookingPayload),
+      });
 
       // Dismiss loading toast
       toast.dismiss(loadingToast);
 
-      if (result.success) {
+      if (response.ok) {
+        const result = await response.json();
+        
         toast.success("🎉 Booking Confirmed!", {
-          description: `Your booking for "${tour.title}" has been confirmed. Booking ID: ${result.bookingId}`,
+          description: `Your booking for "${tour.title}" has been confirmed. Booking ID: ${result.order.id}`,
           duration: 8000,
           action: {
             label: "View Details",
-            onClick: () => console.log('View booking details'),
+            onClick: () => window.location.href = '/dashboard/orders',
           },
         });
 
@@ -143,8 +136,9 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
         });
 
       } else {
+        const errorData = await response.json();
         toast.error("Booking Failed", {
-          description: result.message || "Something went wrong. Please try again.",
+          description: errorData.error || "Something went wrong. Please try again.",
           duration: 5000,
           action: {
             label: "Retry",
@@ -153,10 +147,10 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
         });
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Booking error:', error);
       toast.error("Unexpected Error", {
-        description: "An unexpected error occurred. Please try again.",
+        description: error.message || "An unexpected error occurred. Please try again.",
         duration: 5000,
       });
     } finally {
@@ -186,7 +180,7 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
         <div className="text-center p-4 bg-primary-50 rounded-lg">
           <div className="flex items-baseline justify-center gap-2">
             <span className="text-3xl font-heading font-bold text-primary-600">
-              ৳{price}
+              ${price}
             </span>
             <span className="text-neutral-600">per person</span>
           </div>
@@ -282,16 +276,16 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
           {/* Total Price */}
           <div className="p-4 bg-neutral-50 rounded-lg space-y-2">
             <div className="flex justify-between text-sm">
-              <span>৳{price} × {bookingData.guests} guests</span>
-              <span>৳{price * parseInt(bookingData.guests)}</span>
+              <span>${price} × {bookingData.guests} guests</span>
+              <span>${price * parseInt(bookingData.guests)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Service fee</span>
-              <span>৳49</span>
+              <span>$49</span>
             </div>
             <div className="flex justify-between font-semibold text-lg border-t border-neutral-200 pt-2">
               <span>Total</span>
-              <span className="text-primary-600">৳{totalPrice}</span>
+              <span className="text-primary-600">${totalPrice}</span>
             </div>
           </div>
 
@@ -307,7 +301,7 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
                 Processing Booking...
               </>
             ) : (
-              `Book Now · ৳${totalPrice}`
+              `Book Now · $${totalPrice}`
             )}
           </Button>
 
