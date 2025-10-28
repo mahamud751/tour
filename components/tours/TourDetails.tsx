@@ -21,6 +21,8 @@ export const TourDetails = ({ tour }: TourDetailsProps) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isLiked, setIsLiked] = useState(false);
 
+  console.log("TourDetails received tour data:", tour);
+
   const {
     id,
     title,
@@ -35,6 +37,8 @@ export const TourDetails = ({ tour }: TourDetailsProps) => {
     price,
     maxGroupSize,
   } = tour;
+
+  console.log("Destructured tour data:", { id, title, price, duration, season });
 
   const reviewCount = reviews?.length || 0;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { TourDetails } from "@/components/tours/TourDetails";
 import { Tour } from "@/types";
+import { TourService } from "@/lib/services/tourService";
 
 interface TourPageProps {
   params: Promise<{
@@ -13,29 +14,19 @@ export default async function TourPage({ params }: TourPageProps) {
   const resolvedParams = await params;
   const { id } = resolvedParams;
 
-  // Use the current host for API calls in development
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3061}`;
-
-  // Fetch the tour from our API
+  // Fetch the tour directly from the database instead of making an API call
   let tour: Tour | null = null;
 
   try {
-    const response = await fetch(
-      `${baseUrl}/api/tours/${id}`,
-      {
-        cache: "no-store",
-      }
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      tour = data.tour;
-    }
+    console.log("Fetching tour directly from database with ID:", id);
+    tour = await TourService.getTourById(id) as Tour | null;
+    console.log("Tour fetched from database:", tour);
   } catch (error) {
-    console.error("Error fetching tour:", error);
+    console.error("Error fetching tour from database:", error);
   }
 
   if (!tour) {
+    console.log("Tour not found, showing 404");
     notFound();
   }
 
@@ -55,23 +46,15 @@ export async function generateMetadata({ params }: TourPageProps) {
   const resolvedParams = await params;
   const { id } = resolvedParams;
   
-  // Use the current host for API calls in development
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3061}`;
-
-  // Fetch the tour from our API
+  // Fetch the tour directly from the database instead of making an API call
   let tour: Tour | null = null;
 
   try {
-    const response = await fetch(`${baseUrl}/api/tours/${id}`, {
-      cache: "no-store",
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      tour = data.tour;
-    }
+    console.log("Fetching tour for metadata directly from database with ID:", id);
+    tour = await TourService.getTourById(id) as Tour | null;
+    console.log("Tour for metadata fetched from database:", tour);
   } catch (error) {
-    console.error("Error fetching tour:", error);
+    console.error("Error fetching tour for metadata from database:", error);
   }
 
   if (!tour) {
@@ -86,7 +69,8 @@ export async function generateMetadata({ params }: TourPageProps) {
     150
   )}... Book now with Next Go for the best travel experience.`;
 
-  // Use dynamic OG image
+  // Use the NEXT_PUBLIC_BASE_URL for OG image
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3061}`;
   const ogImage = `${baseUrl}/api/og/tour/${id}`;
 
   return {

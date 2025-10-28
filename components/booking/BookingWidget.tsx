@@ -24,6 +24,8 @@ interface BookingPayload {
 }
 
 export const BookingWidget = ({ tour }: BookingWidgetProps) => {
+  console.log("BookingWidget received tour data:", tour);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [bookingData, setBookingData] = useState({
     date: '',
@@ -34,6 +36,8 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
   });
 
   const { price, maxGroupSize } = tour;
+  
+  console.log("Tour price:", price, "Max group size:", maxGroupSize);
 
   const guestOptions = Array.from({ length: maxGroupSize }, (_, i) => (i + 1).toString());
 
