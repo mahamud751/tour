@@ -1,12 +1,14 @@
 import { ImageResponse } from "next/og";
+import { NextRequest } from "next/server";
 import { Tour } from "@/types";
+import { NextResponse } from "next/server";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Fetch the tour data
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
