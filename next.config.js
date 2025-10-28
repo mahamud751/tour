@@ -18,6 +18,12 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "i.ibb.co.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "plus.unsplash.com",
         port: "",
         pathname: "/**",
