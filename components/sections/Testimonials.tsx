@@ -6,11 +6,17 @@ import { Quote, Star, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { testimonials } from '@/data/mockData';  // Ensure this exports with 'description'
+import { testimonials } from '@/data/mockData';
 
 export const Testimonials = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  // Handle client-side mounting
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const nextTestimonial = () => {
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
@@ -35,16 +41,12 @@ export const Testimonials = () => {
     return () => clearInterval(interval);
   }, [isAutoPlaying, currentIndex]);
 
-  // Determine which testimonials to show based on screen size with proper wrapping
+  // Determine which testimonials to show - always return 3 for SSR
   const getVisibleTestimonials = () => {
-    if (typeof window === 'undefined') {
-      return Array(3).fill(null).map((_, i) =>
-        testimonials[(currentIndex + i) % testimonials.length]
-      );
-    }
-
-    const width = window.innerWidth;
-    const count = width < 768 ? 1 : width < 1024 ? 2 : 3;
+    // Always show 3 items during SSR to match initial client render
+    const count = !mounted ? 3 : 
+      window.innerWidth < 768 ? 1 : 
+      window.innerWidth < 1024 ? 2 : 3;
 
     return Array(count).fill(null).map((_, i) =>
       testimonials[(currentIndex + i) % testimonials.length]
@@ -194,7 +196,7 @@ const TestimonialCard = ({ testimonial, isActive }: TestimonialCardProps) => {
           ))}
         </div>
 
-        {/* Testimonial Content - Fixed: Use 'description' to match type */}
+        {/* Testimonial Content */}
         <blockquote className="body-base text-neutral-700 mb-6 line-clamp-5">
           &quot;{testimonial.description}&quot;
         </blockquote>

@@ -21,7 +21,7 @@ export const Footer = () => {
       { name: 'Our Team', href: '/about#team' },
       { name: 'Careers', href: '/' },
       { name: 'Press Kit', href: '/' },
-      { name: 'Blog', href: '/' },
+      { name: 'Blog', href: '/blog' },
     ],
     services: [
       { name: 'Adventure Tours', href: '/tours?type=adventure' },
@@ -76,10 +76,10 @@ export const Footer = () => {
   return (
     <footer className="bg-neutral-900 text-white">
       {/* Main Footer */}
-      <div className="container-custom py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-6 gap-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-8 lg:gap-10">
           {/* Brand Column */}
-          <div className="xl:col-span-2 space-y-6">
+          <div className="sm:col-span-2 lg:col-span-3 xl:col-span-2 space-y-6">
             <Link href="/" className="flex items-center space-x-3 group">
               <div className="relative">
                 <Plane className="h-8 w-8 text-primary-400 group-hover:scale-110 transition-transform duration-300" />
@@ -90,29 +90,29 @@ export const Footer = () => {
               </span>
             </Link>
             
-            <p className="text-neutral-400 leading-relaxed max-w-md">
+            <p className="text-neutral-400 leading-relaxed max-w-md text-sm md:text-base">
               Go where your heart roams. We create unforgettable travel experiences 
               that connect you with the world&apos;s most beautiful destinations and cultures.
             </p>
 
             {/* Contact Info */}
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors">
-                <Phone className="w-4 h-4 text-primary-400" />
+              <a href="tel:+15551234567" className="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors text-sm md:text-base">
+                <Phone className="w-4 h-4 flex-shrink-0 text-primary-400" />
                 <span>+1 (555) 123-ROAM</span>
-              </div>
-              <div className="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors">
-                <Mail className="w-4 h-4 text-primary-400" />
+              </a>
+              <a href="mailto:hello@roamio.com" className="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors text-sm md:text-base">
+                <Mail className="w-4 h-4 flex-shrink-0 text-primary-400" />
                 <span>hello@roamio.com</span>
-              </div>
-              <div className="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors">
-                <MapPin className="w-4 h-4 text-primary-400" />
+              </a>
+              <div className="flex items-start gap-3 text-neutral-400 text-sm md:text-base">
+                <MapPin className="w-4 h-4 flex-shrink-0 text-primary-400 mt-1" />
                 <span>123 Travel Street, San Francisco, CA</span>
               </div>
             </div>
 
             {/* Social Links */}
-            <div className="flex gap-4 pt-4">
+            <div className="flex gap-3 pt-2">
               {socialLinks.map((social) => {
                 const Icon = social.icon;
                 return (
@@ -131,15 +131,15 @@ export const Footer = () => {
 
           {/* Company Links */}
           <div className="space-y-4">
-            <h3 className="font-heading font-semibold text-white text-lg">Company</h3>
-            <ul className="space-y-3">
+            <h3 className="font-heading font-semibold text-white text-base md:text-lg">Company</h3>
+            <ul className="space-y-2.5">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
                   <Link 
                     href={link.href}
-                    className="text-neutral-400 hover:text-primary-400 transition-colors duration-300 flex items-center gap-2 group"
+                    className="text-neutral-400 hover:text-primary-400 transition-colors duration-300 flex items-center gap-2 group text-sm md:text-base"
                   >
-                    <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <ArrowRight className="w-3 h-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     {link.name}
                   </Link>
                 </li>
@@ -149,15 +149,15 @@ export const Footer = () => {
 
           {/* Services Links */}
           <div className="space-y-4">
-            <h3 className="font-heading font-semibold text-white text-lg">Services</h3>
-            <ul className="space-y-3">
+            <h3 className="font-heading font-semibold text-white text-base md:text-lg">Services</h3>
+            <ul className="space-y-2.5">
               {footerLinks.services.map((link) => (
                 <li key={link.name}>
                   <Link 
                     href={link.href}
-                    className="text-neutral-400 hover:text-primary-400 transition-colors duration-300 flex items-center gap-2 group"
+                    className="text-neutral-400 hover:text-primary-400 transition-colors duration-300 flex items-center gap-2 group text-sm md:text-base"
                   >
-                    <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <ArrowRight className="w-3 h-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     {link.name}
                   </Link>
                 </li>
@@ -167,15 +167,15 @@ export const Footer = () => {
 
           {/* Support Links */}
           <div className="space-y-4">
-            <h3 className="font-heading font-semibold text-white text-lg">Support</h3>
-            <ul className="space-y-3">
+            <h3 className="font-heading font-semibold text-white text-base md:text-lg">Support</h3>
+            <ul className="space-y-2.5">
               {footerLinks.support.map((link) => (
                 <li key={link.name}>
                   <Link 
                     href={link.href}
-                    className="text-neutral-400 hover:text-primary-400 transition-colors duration-300 flex items-center gap-2 group"
+                    className="text-neutral-400 hover:text-primary-400 transition-colors duration-300 flex items-center gap-2 group text-sm md:text-base"
                   >
-                    <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <ArrowRight className="w-3 h-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     {link.name}
                   </Link>
                 </li>
@@ -185,15 +185,15 @@ export const Footer = () => {
 
           {/* Destinations Links */}
           <div className="space-y-4">
-            <h3 className="font-heading font-semibold text-white text-lg">Top Destinations</h3>
-            <ul className="space-y-3">
+            <h3 className="font-heading font-semibold text-white text-base md:text-lg">Top Destinations</h3>
+            <ul className="space-y-2.5">
               {footerLinks.destinations.map((link) => (
                 <li key={link.name}>
                   <Link 
                     href={link.href}
-                    className="text-neutral-400 hover:text-primary-400 transition-colors duration-300 flex items-center gap-2 group"
+                    className="text-neutral-400 hover:text-primary-400 transition-colors duration-300 flex items-center gap-2 group text-sm md:text-base"
                   >
-                    <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <ArrowRight className="w-3 h-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     {link.name}
                   </Link>
                 </li>
@@ -205,22 +205,22 @@ export const Footer = () => {
 
       {/* Newsletter Section */}
       <div className="border-t border-neutral-800">
-        <div className="container-custom py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
           <Newsletter />
         </div>
       </div>
 
       {/* Bottom Bar */}
       <div className="border-t border-neutral-800">
-        <div className="container-custom py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-neutral-400 text-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+            <div className="text-neutral-400 text-xs md:text-sm">
               © {currentYear} Roamio. All rights reserved. 
-              <span className="mx-2">•</span>
-              Made with ❤️ for travelers
+              <span className="hidden sm:inline mx-2">•</span>
+              <span className="block sm:inline mt-1 sm:mt-0">Made with ❤️ for travelers</span>
             </div>
             
-            <div className="flex items-center gap-6 text-sm text-neutral-400">
+            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-xs md:text-sm text-neutral-400">
               <Link href="/privacy" className="hover:text-white transition-colors">
                 Privacy Policy
               </Link>
@@ -237,23 +237,23 @@ export const Footer = () => {
 
       {/* Trust Badges */}
       <div className="bg-neutral-800">
-        <div className="container-custom py-4">
-          <div className="flex flex-wrap items-center justify-center gap-8 text-neutral-400 text-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 text-neutral-400 text-xs md:text-sm">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              SSL Secure Booking
+              <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+              <span className="whitespace-nowrap">SSL Secure Booking</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              Best Price Guarantee
+              <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+              <span className="whitespace-nowrap">Best Price Guarantee</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              24/7 Customer Support
+              <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+              <span className="whitespace-nowrap">24/7 Customer Support</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              Verified Reviews
+              <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+              <span className="whitespace-nowrap">Verified Reviews</span>
             </div>
           </div>
         </div>

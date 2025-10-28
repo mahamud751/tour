@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { X, ZoomIn } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { galleryImages } from '@/data/mockData';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 // Gallery categories (derived from galleryImages for dynamism)
 const categories = ['All', ...new Set(galleryImages.map(img => img.category))];
@@ -78,6 +79,13 @@ export const Gallery = () => {
         {/* Image Modal */}
         <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
           <DialogContent className="max-w-4xl w-full p-0 bg-transparent border-0">
+            {/* Visually Hidden Title for Accessibility */}
+            <VisuallyHidden>
+              <DialogTitle>
+                {selectedImage ? selectedImage.alt : 'Gallery Image'}
+              </DialogTitle>
+            </VisuallyHidden>
+
             {selectedImage && (
               <div className="relative">
                 {/* Close Button */}

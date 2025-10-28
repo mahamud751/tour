@@ -23,11 +23,12 @@ const Header = () => {
   const [isClient, setIsClient] = useState(false);
   const pathname = usePathname();
 
-  const navigation = [
-    { name: "Home", href: "/" },
-    { name: "Tours", href: "/tours" },
-    { name: "Gallery", href: "/about" },
-    { name: "Contact", href: "/contact" },
+ const navigation = [
+    { name: 'Home', href: '/' },
+    { name: 'Tours', href: '/tours' },
+    { name: 'Blog', href: '/blog' },
+    { name: 'Gallery', href: '/about' },
+    { name: 'Contact', href: '/contact' },
   ];
 
   useEffect(() => {

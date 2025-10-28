@@ -41,15 +41,15 @@ export const Hero = () => {
               </h1>
               
               <p className="body-large max-w-2xl mx-auto lg:mx-0">
-                Discover unforgettable adventures with Roamio. Explore diverse destinations, 
-                plan seamlessly, and embark on journeys of a lifetime. Your next adventure starts here.
+                Discover Bangladesh&apos;s hidden gems with Roamio. Explore stunning beaches, lush hills, 
+                and vibrant cultures, plan seamlessly, and embark on journeys of a lifetime. Your next local adventure starts here.
               </p>
             </div>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button size="lg" className="btn-primary text-base px-8 py-3">
-                Explore Tours
+                Discover Bangladesh
               </Button>
               <Button variant="outline" size="lg" className="text-base px-8 py-3">
                 <Play className="w-4 h-4 mr-2" />
@@ -60,16 +60,16 @@ export const Hero = () => {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-8 pt-8 max-w-md mx-auto lg:mx-0">
               <div className="text-center">
-                <div className="text-2xl font-heading font-bold text-primary-600">500+</div>
-                <div className="text-sm text-neutral-600">Destinations</div>
+                <div className="text-2xl font-heading font-bold text-primary-600">8+</div>
+                <div className="text-sm text-neutral-600">Divisions Covered</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-heading font-bold text-primary-600">10K+</div>
+                <div className="text-2xl font-heading font-bold text-primary-600">5K+</div>
                 <div className="text-sm text-neutral-600">Happy Travelers</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-heading font-bold text-primary-600">98%</div>
-                <div className="text-sm text-neutral-600">Satisfaction</div>
+                <div className="text-2xl font-heading font-bold text-primary-600">4.8/5</div>
+                <div className="text-sm text-neutral-600">Average Rating</div>
               </div>
             </div>
           </div>
@@ -80,7 +80,7 @@ export const Hero = () => {
             <div className="grid grid-cols-3 gap-4 min-h-[300px]">
               <div className="rounded-2xl overflow-hidden shadow-lg relative h-[300px]">
                 <Image
-                  src="https://images.unsplash.com/photo-1568849676085-51415703900f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=387" 
+                  src="/images/hero/02.jpg" 
                   alt="Beautiful beach destination"
                   fill
                   className="object-cover hover:scale-110 transition-transform duration-700"
@@ -90,7 +90,7 @@ export const Hero = () => {
               </div>
               <div className="rounded-2xl overflow-hidden shadow-lg mt-8 relative h-[300px]">
                 <Image
-                  src="https://images.unsplash.com/photo-1541410965313-d53b3c16ef17?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=387" 
+                  src="/images/hero/01.png" 
                   alt="Mountain adventure"
                   fill
                   className="object-cover hover:scale-110 transition-transform duration-700"
@@ -100,7 +100,7 @@ export const Hero = () => {
               </div>
               <div className="rounded-2xl overflow-hidden shadow-lg relative h-[300px]">
                 <Image
-                  src="https://images.unsplash.com/photo-1507608443039-bfde4fbcd142?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=387"  
+                  src="/images/hero/03.jpg"  
                   alt="City exploration"
                   fill
                   className="object-cover hover:scale-110 transition-transform duration-700"
