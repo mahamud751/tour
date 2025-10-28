@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { mockTours } from "@/data/mockData";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, readFile } from "fs/promises";
 import { join } from "path";
 import { stat } from "fs/promises";
 import { v4 as uuidv4 } from "uuid";
@@ -17,32 +17,87 @@ async function main() {
   if (existingTours === 0) {
     console.log("Inserting tours with local images...");
 
-    for (const tour of mockTours) {
+    // Get existing images from the images directory
+    const imageDir = join(process.cwd(), "public", "images", "tour");
+    const sampleImages = [
+      "01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg", "06.jpg"
+    ];
+
+    for (let i = 0; i < mockTours.length && i < sampleImages.length; i++) {
+      const tour = mockTours[i];
+      const sampleImage = sampleImages[i];
+      
       // Generate a unique filename for each tour image
-      const fileExtension = "jpg"; // Default to jpg
+      const fileExtension = sampleImage.split(".").pop() || "jpg";
       const uniqueFilename = `${uuidv4()}.${fileExtension}`;
 
-      // For seeding, we'll just create empty files since we're not actually downloading
-      // In a real scenario, you would fetch the image and save it
-      const localImageUrl = `/uploads/${uniqueFilename}`;
+      // Copy the sample image to the uploads directory
+      try {
+        const sourcePath = join(imageDir, sampleImage);
+        const destPath = join(process.cwd(), "public", "uploads", uniqueFilename);
+        
+        // Read the source image
+        const imageBuffer = await readFile(sourcePath);
+        
+        // Ensure uploads directory exists
+        const uploadsDir = join(process.cwd(), "public", "uploads");
+        try {
+          await stat(uploadsDir);
+        } catch (err: any) {
+          if (err.code === "ENOENT") {
+            await mkdir(uploadsDir, { recursive: true });
+          } else {
+            throw err;
+          }
+        }
+        
+        // Write the image to the uploads directory
+        await writeFile(destPath, imageBuffer);
+        
+        const localImageUrl = `/uploads/${uniqueFilename}`;
 
-      await prisma.tour.create({
-        data: {
-          id: tour.id,
-          title: tour.title,
-          description: tour.description,
-          photo: localImageUrl, // Use local image URL instead of external
-          price: tour.price,
-          city: tour.city,
-          address: tour.address,
-          distance: tour.distance,
-          maxGroupSize: tour.maxGroupSize,
-          duration: tour.duration,
-          season: tour.season,
-          featured: tour.featured,
-          avgRating: tour.avgRating,
-        },
-      });
+        await prisma.tour.create({
+          data: {
+            id: tour.id,
+            title: tour.title,
+            description: tour.description,
+            photo: localImageUrl, // Use local image URL instead of external
+            price: tour.price,
+            city: tour.city,
+            address: tour.address,
+            distance: tour.distance,
+            maxGroupSize: tour.maxGroupSize,
+            duration: tour.duration,
+            season: tour.season,
+            featured: tour.featured,
+            avgRating: tour.avgRating,
+          },
+        });
+        
+        console.log(`Successfully copied ${sampleImage} to ${uniqueFilename}`);
+      } catch (error) {
+        console.error(`Error copying image for tour ${tour.id}:`, error);
+        
+        // Fallback to a placeholder if image copy fails
+        const localImageUrl = `/images/tour/${sampleImage}`;
+        await prisma.tour.create({
+          data: {
+            id: tour.id,
+            title: tour.title,
+            description: tour.description,
+            photo: localImageUrl,
+            price: tour.price,
+            city: tour.city,
+            address: tour.address,
+            distance: tour.distance,
+            maxGroupSize: tour.maxGroupSize,
+            duration: tour.duration,
+            season: tour.season,
+            featured: tour.featured,
+            avgRating: tour.avgRating,
+          },
+        });
+      }
     }
 
     console.log("Tours inserted successfully with local images!");
