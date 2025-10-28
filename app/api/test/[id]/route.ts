@@ -1,11 +1,12 @@
 import { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  return new Response(JSON.stringify({ receivedId: params.id }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  // Await the params promise
+  const { id } = await params;
+  
+  return NextResponse.json({ receivedId: id }, { status: 200 });
 }

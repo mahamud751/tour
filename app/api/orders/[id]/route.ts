@@ -1,49 +1,41 @@
 import { NextRequest } from "next/server";
 import { OrderService } from "@/lib/services/orderService";
+import { NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const order = await OrderService.getOrderById(params.id);
+    // Await the params promise
+    const { id } = await params;
+    
+    const order = await OrderService.getOrderById(id);
 
     if (!order) {
-      return new Response(JSON.stringify({ error: "Order not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    return new Response(JSON.stringify({ order }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ order }, { status: 200 });
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json();
 
-    const order = await OrderService.updateOrderStatus(params.id, body.status);
+    // Await the params promise
+    const { id } = await params;
+    
+    const order = await OrderService.updateOrderStatus(id, body.status);
 
-    return new Response(JSON.stringify({ order }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ order }, { status: 200 });
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

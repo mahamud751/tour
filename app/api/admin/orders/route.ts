@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { AuthService } from "@/lib/services/authService";
 import { OrderService } from "@/lib/services/orderService";
+import { NextResponse } from "next/server";
 
 // GET /api/admin/orders - Get all orders (admin only)
 export async function GET(request: NextRequest) {
@@ -9,9 +10,9 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get("authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized: No token provided" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
+      return NextResponse.json(
+        { error: "Unauthorized: No token provided" },
+        { status: 401 }
       );
     }
 
@@ -19,23 +20,17 @@ export async function GET(request: NextRequest) {
     const user = await AuthService.getCurrentUser(token);
 
     if (user.role !== "ADMIN") {
-      return new Response(
-        JSON.stringify({ error: "Forbidden: Admin access required" }),
-        { status: 403, headers: { "Content-Type": "application/json" } }
+      return NextResponse.json(
+        { error: "Forbidden: Admin access required" },
+        { status: 403 }
       );
     }
 
     // Fetch all orders from the database
     const orders = await OrderService.getAllOrders();
 
-    return new Response(JSON.stringify({ orders }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ orders }, { status: 200 });
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

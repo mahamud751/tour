@@ -1,38 +1,32 @@
 import { NextRequest } from "next/server";
 import { TourService } from "@/lib/services/tourService";
+import { NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  console.log("Fetching tour with ID:", context.params.id);
+  console.log("Params promise received");
 
   try {
-    if (!context.params.id) {
-      return new Response(JSON.stringify({ error: "Tour ID is required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+    // Await the params promise
+    const { id: tourId } = await params;
+    
+    console.log("Fetching tour with ID:", tourId);
+
+    if (!tourId) {
+      return NextResponse.json({ error: "Tour ID is required" }, { status: 400 });
     }
 
-    const tour = await TourService.getTourById(context.params.id);
+    const tour = await TourService.getTourById(tourId);
 
     if (!tour) {
-      return new Response(JSON.stringify({ error: "Tour not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
+      return NextResponse.json({ error: "Tour not found" }, { status: 404 });
     }
 
-    return new Response(JSON.stringify({ tour }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ tour }, { status: 200 });
   } catch (error: any) {
     console.error("Error fetching tour:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
