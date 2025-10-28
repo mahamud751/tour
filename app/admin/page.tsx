@@ -93,7 +93,7 @@ export default function AdminDashboardPage() {
       <div>
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome to the Roamio admin panel. Here you can manage tours, orders,
+          Welcome to the Next Go admin panel. Here you can manage tours, orders,
           and users.
         </p>
       </div>

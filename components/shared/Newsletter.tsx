@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Mail, Send } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useState } from "react";
+import { Mail, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export const Newsletter = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle newsletter subscription
-    console.log('Newsletter subscription:', email);
+    console.log("Newsletter subscription:", email);
     setIsSubscribed(true);
-    setEmail('');
-    
+    setEmail("");
+
     // Reset after 3 seconds
     setTimeout(() => setIsSubscribed(false), 3000);
   };
@@ -32,8 +32,8 @@ export const Newsletter = () => {
           Get Travel Inspiration
         </h3>
         <p className="text-neutral-400 leading-relaxed">
-          Subscribe to our newsletter and be the first to receive exclusive deals, 
-          travel tips, and destination guides straight to your inbox.
+          Subscribe to our newsletter and be the first to receive exclusive
+          deals, travel tips, and destination guides straight to your inbox.
         </p>
       </div>
 
@@ -45,7 +45,7 @@ export const Newsletter = () => {
               <Send className="w-6 h-6 text-white" />
             </div>
             <h4 className="font-heading font-semibold text-white text-lg">
-              Welcome to the Roamio Family!
+              Welcome to the Next Go Family!
             </h4>
             <p className="text-neutral-400">
               Thank you for subscribing. Check your inbox for our welcome email.
@@ -54,7 +54,10 @@ export const Newsletter = () => {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="newsletter-email" className="text-white font-medium">
+              <label
+                htmlFor="newsletter-email"
+                className="text-white font-medium"
+              >
                 Email Address
               </label>
               <Input
@@ -67,9 +70,9 @@ export const Newsletter = () => {
                 className="bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-primary-500"
               />
             </div>
-            
-            <Button 
-              type="submit" 
+
+            <Button
+              type="submit"
               className="w-full btn-primary bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 border-0"
             >
               <Send className="w-4 h-4 mr-2" />

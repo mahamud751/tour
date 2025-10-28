@@ -298,7 +298,7 @@ export const ToursFilter = () => {
         <Card className="card">
           <CardContent className="p-6">
             <h4 className="font-semibold text-neutral-800 mb-4">
-              Why Choose Roamio?
+              Why Choose Next Go?
             </h4>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-3">

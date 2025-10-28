@@ -19,6 +19,7 @@ export const TourCard = ({ tour }: TourCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const {
+    id,
     title,
     description,
     price,
@@ -34,10 +35,50 @@ export const TourCard = ({ tour }: TourCardProps) => {
   } = tour;
 
   const reviewCount = reviews?.length || 0;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+  // Generate JSON-LD structured data for the tour
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TouristTrip",
+    name: title,
+    description: description.substring(0, 100) + "...",
+    url: `${baseUrl}/tours/${id}`,
+    image: tour.photo.startsWith("http")
+      ? tour.photo
+      : `${baseUrl}${tour.photo}`,
+    offers: {
+      "@type": "Offer",
+      price: price,
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    location: {
+      "@type": "Place",
+      name: city,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: address,
+        addressLocality: city,
+      },
+    },
+    duration: duration,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: avgRating,
+      reviewCount: reviewCount,
+    },
+  };
 
   return (
-    <Card className="card group overflow-hidden hover:shadow-xl transition-all duration-500 hover:scale-105">
-      <CardContent className="p-0">
+    <Card className="card group overflow-hidden hover:shadow-xl transition-all duration-500 hover:scale-105 h-full flex flex-col">
+      {/* Structured data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <CardContent className="p-0 flex flex-col flex-1">
         {/* Image Section */}
         <div className="relative overflow-hidden">
           <div className="aspect-[4/3] relative bg-neutral-200">
@@ -119,11 +160,11 @@ export const TourCard = ({ tour }: TourCardProps) => {
         </div>
 
         {/* Content Section */}
-        <div className="p-6">
+        <div className="p-6 flex flex-col flex-1">
           {/* Location */}
-          <div className="flex items-center gap-2 text-sm text-neutral-500 mb-3">
-            <MapPin className="w-4 h-4" />
-            <span>
+          <div className="flex items-start gap-2 text-sm text-neutral-500 mb-3 min-h-[40px]">
+            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            <span className="line-clamp-2">
               {city}, {address}
             </span>
           </div>
@@ -134,7 +175,7 @@ export const TourCard = ({ tour }: TourCardProps) => {
           </h3>
 
           {/* Description */}
-          <p className="body-small text-neutral-600 mb-4 line-clamp-2">
+          <p className="body-small text-neutral-600 mb-4 line-clamp-2 flex-1">
             {description}
           </p>
 
@@ -151,11 +192,13 @@ export const TourCard = ({ tour }: TourCardProps) => {
                 ({reviewCount} review{reviewCount !== 1 ? "s" : ""})
               </span>
             </div>
-            <div className="text-sm text-neutral-500">{distance}</div>
+            <div className="text-sm text-neutral-500 text-right min-w-[80px]">
+              {distance}
+            </div>
           </div>
 
           {/* Price and CTA */}
-          <div className="flex items-center justify-between pt-4 border-t border-neutral-200">
+          <div className="flex items-center justify-between pt-4 border-t border-neutral-200 mt-auto">
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-heading font-bold text-primary-600">
                 ${price}

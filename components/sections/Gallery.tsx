@@ -1,24 +1,30 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { X, ZoomIn } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { galleryImages } from '@/data/mockData';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { useState } from "react";
+import Image from "next/image";
+import { X, ZoomIn } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { galleryImages } from "@/data/mockData";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 // Gallery categories (derived from galleryImages for dynamism)
-const categories = ['All', ...new Set(galleryImages.map(img => img.category))];
+const categories = [
+  "All",
+  ...new Set(galleryImages.map((img) => img.category)),
+];
 
 export const Gallery = () => {
-  const [selectedImage, setSelectedImage] = useState<typeof galleryImages[0] | null>(null);
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [selectedImage, setSelectedImage] = useState<
+    (typeof galleryImages)[0] | null
+  >(null);
+  const [activeCategory, setActiveCategory] = useState("All");
 
-  const filteredImages = activeCategory === 'All' 
-    ? galleryImages 
-    : galleryImages.filter(img => img.category === activeCategory);
+  const filteredImages =
+    activeCategory === "All"
+      ? galleryImages
+      : galleryImages.filter((img) => img.category === activeCategory);
 
   return (
     <section className="section-padding bg-white">
@@ -33,8 +39,8 @@ export const Gallery = () => {
             Our <span className="text-primary-600">Gallery</span>
           </h2>
           <p className="body-large text-neutral-600">
-            Unveil travel wonders in our gallery, a snapshot of Roamio&apos;s adventures 
-            and the breathtaking destinations we explore.
+            Unveil travel wonders in our gallery, a snapshot of Next Go&apos;s
+            adventures and the breathtaking destinations we explore.
           </p>
         </div>
 
@@ -60,9 +66,9 @@ export const Gallery = () => {
         {/* Masonry Grid Gallery */}
         <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
           {filteredImages.map((image) => (
-            <GalleryImage 
-              key={image.id} 
-              image={image} 
+            <GalleryImage
+              key={image.id}
+              image={image}
               onSelect={() => setSelectedImage(image)}
             />
           ))}
@@ -77,12 +83,15 @@ export const Gallery = () => {
         </div>
 
         {/* Image Modal */}
-        <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <Dialog
+          open={!!selectedImage}
+          onOpenChange={() => setSelectedImage(null)}
+        >
           <DialogContent className="max-w-4xl w-full p-0 bg-transparent border-0">
             {/* Visually Hidden Title for Accessibility */}
             <VisuallyHidden>
               <DialogTitle>
-                {selectedImage ? selectedImage.alt : 'Gallery Image'}
+                {selectedImage ? selectedImage.alt : "Gallery Image"}
               </DialogTitle>
             </VisuallyHidden>
 
@@ -135,7 +144,7 @@ export const Gallery = () => {
 
 // Individual Gallery Image Component
 interface GalleryImageProps {
-  image: typeof galleryImages[0];
+  image: (typeof galleryImages)[0];
   onSelect: () => void;
 }
 
@@ -143,7 +152,7 @@ const GalleryImage = ({ image, onSelect }: GalleryImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <div 
+    <div
       className={cn(
         "relative group break-inside-avoid mb-4 cursor-pointer",
         "transform transition-all duration-500 hover:scale-105",
@@ -152,18 +161,20 @@ const GalleryImage = ({ image, onSelect }: GalleryImageProps) => {
       onClick={onSelect}
     >
       {/* Image Container */}
-      <div className={cn(
-        "relative bg-neutral-200",
-        image.cols === 2 ? "aspect-square" : "aspect-[3/4]",
-        !isLoaded && "animate-pulse"
-      )}>
+      <div
+        className={cn(
+          "relative bg-neutral-200",
+          image.cols === 2 ? "aspect-square" : "aspect-[3/4]",
+          !isLoaded && "animate-pulse"
+        )}
+      >
         <Image
           src={image.src}
           alt={image.alt}
           fill
           className={cn(
             "object-cover transition-all duration-700",
-            isLoaded ? 'opacity-100' : 'opacity-0',
+            isLoaded ? "opacity-100" : "opacity-0",
             "group-hover:scale-110"
           )}
           onLoad={() => setIsLoaded(true)}

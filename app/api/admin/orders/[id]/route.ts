@@ -5,9 +5,12 @@ import { OrderService } from "@/lib/services/orderService";
 // GET /api/admin/orders/[id] - Get order details (admin only)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await the params Promise
+    const params = await context.params;
+
     // Check if user is admin
     const authHeader = request.headers.get("authorization");
 
@@ -53,9 +56,12 @@ export async function GET(
 // PUT /api/admin/orders/[id] - Update order status (admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await the params Promise
+    const params = await context.params;
+
     // Check if user is admin
     const authHeader = request.headers.get("authorization");
 

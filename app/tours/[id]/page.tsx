@@ -53,19 +53,15 @@ export async function generateMetadata({ params }: TourPageProps) {
   // In Next.js 16, we need to await the params Promise
   const resolvedParams = await params;
   const { id } = resolvedParams;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
   // Fetch the tour from our API
   let tour: Tour | null = null;
 
   try {
-    const response = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-      }/api/tours/${id}`,
-      {
-        cache: "no-store",
-      }
-    );
+    const response = await fetch(`${baseUrl}/api/tours/${id}`, {
+      cache: "no-store",
+    });
 
     if (response.ok) {
       const data = await response.json();
@@ -81,8 +77,42 @@ export async function generateMetadata({ params }: TourPageProps) {
     };
   }
 
+  // Create a structured description
+  const description = `${tour.description.substring(
+    0,
+    150
+  )}... Book now with Next Go for the best travel experience.`;
+
+  // Use dynamic OG image
+  const ogImage = `${baseUrl}/api/og/tour/${id}`;
+
   return {
-    title: `${tour.title} - Roamio`,
-    description: tour.description,
+    title: `${tour.title} - Next Go`,
+    description: description,
+    openGraph: {
+      title: `${tour.title} - Next Go`,
+      description: description,
+      url: `${baseUrl}/tours/${id}`,
+      siteName: "Next Go",
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: tour.title,
+        },
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${tour.title} - Next Go`,
+      description: description,
+      images: [ogImage],
+    },
+    alternates: {
+      canonical: `${baseUrl}/tours/${id}`,
+    },
   };
 }

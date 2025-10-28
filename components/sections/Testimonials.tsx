@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { Quote, Star, ArrowLeft, ArrowRight } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { testimonials } from '@/data/mockData';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { Quote, Star, ArrowLeft, ArrowRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { testimonials } from "@/data/mockData";
 
 export const Testimonials = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -23,7 +23,9 @@ export const Testimonials = () => {
   };
 
   const prevTestimonial = () => {
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    setCurrentIndex(
+      (prev) => (prev - 1 + testimonials.length) % testimonials.length
+    );
   };
 
   const goToTestimonial = (index: number) => {
@@ -44,13 +46,17 @@ export const Testimonials = () => {
   // Determine which testimonials to show - always return 3 for SSR
   const getVisibleTestimonials = () => {
     // Always show 3 items during SSR to match initial client render
-    const count = !mounted ? 3 : 
-      window.innerWidth < 768 ? 1 : 
-      window.innerWidth < 1024 ? 2 : 3;
+    const count = !mounted
+      ? 3
+      : window.innerWidth < 768
+      ? 1
+      : window.innerWidth < 1024
+      ? 2
+      : 3;
 
-    return Array(count).fill(null).map((_, i) =>
-      testimonials[(currentIndex + i) % testimonials.length]
-    );
+    return Array(count)
+      .fill(null)
+      .map((_, i) => testimonials[(currentIndex + i) % testimonials.length]);
   };
 
   const visibleTestimonials = getVisibleTestimonials();
@@ -60,7 +66,10 @@ export const Testimonials = () => {
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary-200 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-float"></div>
-        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-coral-200 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-float" style={{ animationDelay: '2s' }}></div>
+        <div
+          className="absolute -bottom-20 -left-20 w-40 h-40 bg-coral-200 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-float"
+          style={{ animationDelay: "2s" }}
+        ></div>
       </div>
 
       <div className="container-custom relative z-10">
@@ -74,8 +83,9 @@ export const Testimonials = () => {
             What Our <span className="text-primary-600">Travelers Say</span>
           </h2>
           <p className="body-large text-neutral-600">
-            Read what our travelers have to say in their own words. Real stories, real experiences
-            from adventurers who have explored the world with Roamio.
+            Read what our travelers have to say in their own words. Real
+            stories, real experiences from adventurers who have explored the
+            world with Next Go.
           </p>
         </div>
 
@@ -139,19 +149,27 @@ export const Testimonials = () => {
         {/* Stats Section */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 pt-12 border-t border-neutral-200/50">
           <div className="text-center">
-            <div className="text-3xl font-heading font-bold text-primary-600 mb-2">4.9/5</div>
+            <div className="text-3xl font-heading font-bold text-primary-600 mb-2">
+              4.9/5
+            </div>
             <div className="text-sm text-neutral-600">Average Rating</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-heading font-bold text-primary-600 mb-2">10K+</div>
+            <div className="text-3xl font-heading font-bold text-primary-600 mb-2">
+              10K+
+            </div>
             <div className="text-sm text-neutral-600">Happy Travelers</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-heading font-bold text-primary-600 mb-2">98%</div>
+            <div className="text-3xl font-heading font-bold text-primary-600 mb-2">
+              98%
+            </div>
             <div className="text-sm text-neutral-600">Would Recommend</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-heading font-bold text-primary-600 mb-2">50+</div>
+            <div className="text-3xl font-heading font-bold text-primary-600 mb-2">
+              50+
+            </div>
             <div className="text-sm text-neutral-600">Countries Covered</div>
           </div>
         </div>
@@ -162,7 +180,7 @@ export const Testimonials = () => {
 
 // Individual Testimonial Card Component
 interface TestimonialCardProps {
-  testimonial: typeof testimonials[0];
+  testimonial: (typeof testimonials)[0];
   isActive: boolean;
 }
 
@@ -170,11 +188,13 @@ const TestimonialCard = ({ testimonial, isActive }: TestimonialCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
-    <Card className={cn(
-      "card-elevated group transition-all duration-500",
-      isActive ? "opacity-100 scale-100" : "opacity-0 scale-95",
-      "hover:shadow-xl hover:border-primary-200"
-    )}>
+    <Card
+      className={cn(
+        "card-elevated group transition-all duration-500",
+        isActive ? "opacity-100 scale-100" : "opacity-0 scale-95",
+        "hover:shadow-xl hover:border-primary-200"
+      )}
+    >
       <CardContent className="p-6">
         {/* Quote Icon */}
         <div className="mb-4">
@@ -204,7 +224,9 @@ const TestimonialCard = ({ testimonial, isActive }: TestimonialCardProps) => {
         {/* Travel Info */}
         <div className="mb-6 p-3 bg-neutral-50 rounded-lg">
           <div className="text-xs text-neutral-600">
-            <div className="font-medium text-primary-600">{testimonial.trip}</div>
+            <div className="font-medium text-primary-600">
+              {testimonial.trip}
+            </div>
             <div>{testimonial.location}</div>
           </div>
         </div>
@@ -220,7 +242,7 @@ const TestimonialCard = ({ testimonial, isActive }: TestimonialCardProps) => {
                 height={48}
                 className={cn(
                   "object-cover transition-all duration-500",
-                  imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
+                  imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"
                 )}
                 onLoad={() => setImageLoaded(true)}
               />
@@ -232,7 +254,9 @@ const TestimonialCard = ({ testimonial, isActive }: TestimonialCardProps) => {
             <h4 className="font-heading font-semibold text-neutral-800 truncate">
               {testimonial.name}
             </h4>
-            <p className="text-sm text-neutral-600 truncate">{testimonial.role}</p>
+            <p className="text-sm text-neutral-600 truncate">
+              {testimonial.role}
+            </p>
           </div>
         </div>
       </CardContent>

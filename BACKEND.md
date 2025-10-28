@@ -1,6 +1,6 @@
-# Roamio Backend Implementation
+# NextGo Backend Implementation
 
-This document describes the backend implementation for the Roamio tourism website.
+This document describes the backend implementation for the NextGo tourism website.
 
 ## Technology Stack
 

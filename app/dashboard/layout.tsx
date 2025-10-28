@@ -101,7 +101,7 @@ export default function DashboardLayout({
               onClick={() => setIsMenuOpen(false)}
             >
               <Package2 className="h-6 w-6" />
-              <span className="sr-only">Roamio</span>
+              <span className="sr-only">Next Go</span>
             </Link>
             {navItems.map((item) => (
               <Link
@@ -137,7 +137,7 @@ export default function DashboardLayout({
               className="flex items-center gap-2 font-semibold"
             >
               <Package2 className="h-6 w-6" />
-              <span className="">Roamio</span>
+              <span className="">Next Go</span>
             </Link>
           </div>
           <div className="flex-1">

@@ -1,6 +1,40 @@
-import { ContactForm } from '@/components/contact/ContactForm';
-import { ContactInfo } from '@/components/contact/ContactInfo';
-import { MapPin } from 'lucide-react';
+import { ContactForm } from "@/components/contact/ContactForm";
+import { ContactInfo } from "@/components/contact/ContactInfo";
+import { MapPin } from "lucide-react";
+
+export async function generateMetadata() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+  return {
+    title: "Contact Us - Next Go | Get In Touch",
+    description:
+      "Get in touch with Next Go for travel assistance, bookings, and inquiries. Our team of travel experts is ready to help plan your next adventure.",
+    openGraph: {
+      title: "Contact Us - Next Go | Get In Touch",
+      description:
+        "Get in touch with Next Go for travel assistance, bookings, and inquiries. Our team of travel experts is ready to help plan your next adventure.",
+      url: `${baseUrl}/contact`,
+      siteName: "Next Go",
+      images: [
+        {
+          url: `${baseUrl}/images/og-contact.jpg`,
+          width: 1200,
+          height: 630,
+          alt: "Contact Next Go",
+        },
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Contact Us - Next Go | Get In Touch",
+      description:
+        "Get in touch with Next Go for travel assistance, bookings, and inquiries. Our team of travel experts is ready to help plan your next adventure.",
+      images: [`${baseUrl}/images/og-contact.jpg`],
+    },
+  };
+}
 
 export default function ContactPage() {
   return (
@@ -8,12 +42,10 @@ export default function ContactPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary-500 to-primary-600 text-white py-20">
         <div className="container-custom text-center">
-          <h1 className="heading-primary text-white mb-6">
-            Contact Us
-          </h1>
+          <h1 className="heading-primary text-white mb-6">Contact Us</h1>
           <p className="body-large text-white/90 max-w-2xl mx-auto">
-            Ready to start your next adventure? We&apos;re here to help! 
-            Get in touch with our travel experts for personalized assistance.
+            Ready to start your next adventure? We&apos;re here to help! Get in
+            touch with our travel experts for personalized assistance.
           </p>
         </div>
       </section>
@@ -43,7 +75,8 @@ export default function ContactPage() {
               Visit Our <span className="text-primary-600">Office</span>
             </h2>
             <p className="body-large text-neutral-600">
-              Stop by our headquarters to meet the team and discuss your travel plans in person.
+              Stop by our headquarters to meet the team and discuss your travel
+              plans in person.
             </p>
           </div>
 
@@ -54,7 +87,7 @@ export default function ContactPage() {
                 <MapPin className="w-8 h-8 text-white" />
               </div>
               <p className="text-neutral-600 font-medium">Interactive Map</p>
-              <p className="text-neutral-500 text-sm">123 Travel Street, San Francisco, CA 94102</p>
+              <p className="text-neutral-500 text-sm">Mirpur 10, Dhaka</p>
             </div>
           </div>
         </div>

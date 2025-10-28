@@ -23,12 +23,12 @@ const Header = () => {
   const [isClient, setIsClient] = useState(false);
   const pathname = usePathname();
 
- const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Tours', href: '/tours' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'Gallery', href: '/about' },
-    { name: 'Contact', href: '/contact' },
+  const navigation = [
+    { name: "Home", href: "/" },
+    { name: "Tours", href: "/tours" },
+    { name: "Blog", href: "/blog" },
+    { name: "Gallery", href: "/about" },
+    { name: "Contact", href: "/contact" },
   ];
 
   useEffect(() => {
@@ -111,7 +111,7 @@ const Header = () => {
             <div className="flex items-center space-x-2">
               <Plane className="h-8 w-8 text-primary-500" />
               <span className="text-2xl font-heading font-bold text-primary-600">
-                Roamio
+                Next Go
               </span>
             </div>
           </Link>
@@ -195,7 +195,7 @@ const Header = () => {
             <div className="flex items-center space-x-2">
               <Plane className="h-8 w-8 text-primary-500" />
               <span className="text-2xl font-heading font-bold text-primary-600">
-                Roamio
+                Next Go
               </span>
             </div>
           </Link>

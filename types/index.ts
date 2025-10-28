@@ -1,13 +1,13 @@
 export interface Service {
   title: string;
   description: string;
-  icon: 'Bus' | 'Plane' | 'Hotel' | 'Shield' | 'HeartHandshake' | 'Globe';
+  icon: "Bus" | "Plane" | "Hotel" | "Shield" | "HeartHandshake" | "Globe";
   features: string[];
   gradient: string;
 }
 
 export interface Activity {
-  type: 'transfer' | 'food' | 'hotel' | 'tour';
+  type: "transfer" | "food" | "hotel" | "tour";
   time: string;
   description: string;
 }
@@ -29,12 +29,14 @@ export interface Tour {
   address: string;
   distance: string;
   maxGroupSize: number;
-  reviews: Review[];
+  reviews?: Review[];
   avgRating: number;
   featured?: boolean;
   duration?: string;
   season?: string;
   itinerary?: ItineraryDay[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Review {
@@ -61,7 +63,7 @@ export interface FAQ {
   id: string;
   question: string;
   answer: string;
-  category?: string; 
+  category?: string;
 }
 
 export interface SearchParams {
@@ -84,7 +86,7 @@ export interface BookingFormData {
 }
 
 export interface ContactMethod {
-  icon: React.ComponentType<{ className?: string }>;  // Lucide icons
+  icon: React.ComponentType<{ className?: string }>; // Lucide icons
   title: string;
   description: string;
   details: string;

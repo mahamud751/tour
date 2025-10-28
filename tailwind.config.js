@@ -19,7 +19,7 @@ const config = {
     },
     extend: {
       colors: {
-        // === Roamio Brand Colors ===
+        // === Next Go Brand Colors ===
         primary: {
           50: "#f0f9ff",
           100: "#e0f2fe",
