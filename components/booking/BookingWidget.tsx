@@ -10,9 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Tour } from '@/types';
+import { useSession } from "next-auth/react";
 
 interface BookingWidgetProps {
   tour: Tour;
+  onOpenAuthModal?: () => void;
 }
 
 interface BookingPayload {
@@ -23,7 +25,7 @@ interface BookingPayload {
   bookAt: string;
 }
 
-export const BookingWidget = ({ tour }: BookingWidgetProps) => {
+export const BookingWidget = ({ tour, onOpenAuthModal }: BookingWidgetProps) => {
   console.log("BookingWidget received tour data:", tour);
   
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +36,7 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
     email: '',
     phone: '',
   });
+  const { data: session } = useSession();
 
   const { price, maxGroupSize } = tour;
   
@@ -78,16 +81,18 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
         return;
       }
 
-      // Get token from localStorage
-      const token = localStorage.getItem('token');
+      // Get token from localStorage or session
+      const token = localStorage.getItem('token') || (session as any)?.token;
       
       if (!token) {
         toast.error("Authentication Required", {
           description: "Please log in to book a tour.",
         });
         setIsLoading(false);
-        // Redirect to login page
-        window.location.href = '/login';
+        // Open AuthModal instead of redirecting
+        if (onOpenAuthModal) {
+          onOpenAuthModal();
+        }
         return;
       }
 

@@ -34,71 +34,114 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      // Wait for NextAuth to resolve
-      if (status === "loading") return;
+    // Check for NextAuth session
+    if (status === "loading") return;
 
-      // Prefer NextAuth session token
-      let token: string | null = (session as any)?.token ?? null;
-      if (session?.user && token) {
-        localStorage.setItem("token", token);
-        window.dispatchEvent(new Event("authChange"));
+    // If NextAuth session exists, use it
+    if (session?.user) {
+      setUser({
+        id: (session.user as any).id,
+        name:
+          (session.user as any).name ||
+          session.user.email?.split("@")[0] ||
+          "User",
+        email: session.user.email || "",
+        role: (session.user as any).role || "USER",
+      });
+      setFormData({
+        name:
+          (session.user as any).name ||
+          session.user.email?.split("@")[0] ||
+          "User",
+        email: session.user.email || "",
+      });
+      setLoading(false);
+      return;
+    }
+
+    // If no NextAuth session, check for user data in localStorage (client-side only)
+    if (typeof window !== "undefined") {
+      const userData = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
+      
+      if (userData && token) {
+        const parsedUser = JSON.parse(userData);
         setUser({
-          id: (session.user as any).id,
-          name:
-            (session.user as any).name ||
-            session.user.email?.split("@")[0] ||
-            "User",
-          email: session.user.email || "",
-          role: (session.user as any).role || "USER",
+          id: parsedUser.id,
+          name: parsedUser.name || parsedUser.email?.split("@")[0] || "User",
+          email: parsedUser.email || "",
+          role: parsedUser.role || "USER",
         });
-      } else {
-        token = localStorage.getItem("token");
-      }
-
-      if (!token) {
-        router.push("/");
+        setFormData({
+          name: parsedUser.name || parsedUser.email?.split("@")[0] || "User",
+          email: parsedUser.email || "",
+        });
+        setLoading(false);
         return;
       }
-
-      try {
-        const response = await fetch("/api/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          setUser(data.user);
-          setFormData({
-            name: data.user.name,
-            email: data.user.email,
-          });
-        } else {
-          localStorage.removeItem("token");
-          router.push("/");
-        }
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-        toast.error("Failed to load profile");
-      } finally {
-        setLoading(false);
+      
+      // If no user data but token exists, validate token
+      if (token) {
+        validateTokenAndSetUser(token);
+        return;
       }
-    };
+    }
 
-    fetchUserProfile();
+    // If no session or token found, redirect to home
+    router.push("/");
   }, [router, session, status]);
+
+  const validateTokenAndSetUser = async (token: string) => {
+    try {
+      const response = await fetch("/api/auth/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUser({
+          id: userData.id,
+          name: userData.name || userData.email?.split("@")[0] || "User",
+          email: userData.email || "",
+          role: userData.role || "USER",
+        });
+        setFormData({
+          name: userData.name || userData.email?.split("@")[0] || "User",
+          email: userData.email || "",
+        });
+        setLoading(false);
+        
+        // Store user data in localStorage
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
+      } else {
+        // Invalid token, remove it and redirect
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        }
+        router.push("/");
+      }
+    } catch (error) {
+      // Error validating token, remove it and redirect
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+      router.push("/");
+    }
+  };
+
+  // If no session or token, redirect (handled by useEffect)
+  if (!session?.user && (typeof window === "undefined" || (!localStorage.getItem("token") && !localStorage.getItem("user")))) {
+    return null;
+  }
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/");
-      return;
-    }
 
     try {
       // In a real app, you would have an API endpoint to update user profile
@@ -118,22 +161,6 @@ export default function ProfilePage() {
       toast.error("Failed to update profile");
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        User not found
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -178,10 +205,12 @@ export default function ProfilePage() {
                   variant="outline"
                   onClick={() => {
                     setIsEditing(false);
-                    setFormData({
-                      name: user.name,
-                      email: user.email,
-                    });
+                    if (user) {
+                      setFormData({
+                        name: user.name,
+                        email: user.email,
+                      });
+                    }
                   }}
                 >
                   Cancel
@@ -193,16 +222,16 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <Label className="text-muted-foreground">Full Name</Label>
-                  <p className="font-medium">{user.name}</p>
+                  <p className="font-medium">{user?.name}</p>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-muted-foreground">Email</Label>
-                  <p className="font-medium">{user.email}</p>
+                  <p className="font-medium">{user?.email}</p>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-muted-foreground">Account Type</Label>
                   <p className="font-medium capitalize">
-                    {user.role.toLowerCase()}
+                    {user?.role.toLowerCase()}
                   </p>
                 </div>
                 <div className="space-y-1">

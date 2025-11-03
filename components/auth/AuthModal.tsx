@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
+import { Eye, EyeOff } from "lucide-react";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -32,6 +33,8 @@ export const AuthModal = ({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -92,6 +95,10 @@ export const AuthModal = ({
       if (response.ok) {
         // Store token in localStorage
         localStorage.setItem("token", data.token);
+        
+        // Store user data in localStorage
+        localStorage.setItem("user", JSON.stringify(data.user));
+        
         toast.success(
           mode === "login" ? "Login successful!" : "Registration successful!"
         );
@@ -124,18 +131,31 @@ const handleGoogleSignIn = async () => {
   try {
     const result = await signIn("google", {
       callbackUrl: "/dashboard",
-      redirect: true, // Changed to true to ensure proper redirect
+      redirect: false,
     });
 
     if (result?.error) {
-      toast.error("Google sign in failed");
+      toast.error("Google sign in failed: " + result.error);
       return;
     }
 
-    // With redirect: true, the user will be redirected automatically
-    // The dashboard page will handle token retrieval and storage
-    toast.success("Google sign in successful!");
-    onClose();
+    // For successful sign-in without redirect, we need to manually handle the redirect
+    if (result?.ok) {
+      // Wait a moment for the session to be established
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Get the current session
+      const sessionData: any = await getSession();
+      if (sessionData?.token) {
+        localStorage.setItem("token", sessionData.token);
+        window.dispatchEvent(new Event("authChange"));
+      }
+      
+      toast.success("Google sign in successful!");
+      onClose();
+      // Manually redirect to dashboard
+      window.location.href = "/dashboard";
+    }
   } catch (error) {
     console.error("Google Sign-In Error:", error);
     toast.error("An error occurred during Google sign in");
@@ -191,29 +211,55 @@ const handleGoogleSignIn = async () => {
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {mode === "register" && (
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required={mode === "register"}
-                />
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm your password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required={mode === "register"}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-500" />
+                    )}
+                  </button>
+                </div>
               </div>
             )}
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,9 +11,10 @@ import { Tour } from "@/types";
 
 interface TourCardProps {
   tour: Tour;
+  onBookNow?: (tourId: string) => void;
 }
 
-export const TourCard = ({ tour }: TourCardProps) => {
+export const TourCard = ({ tour, onBookNow }: TourCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -68,6 +68,15 @@ export const TourCard = ({ tour }: TourCardProps) => {
       ratingValue: avgRating,
       reviewCount: reviewCount,
     },
+  };
+
+  const handleBookNow = () => {
+    if (onBookNow) {
+      onBookNow(tour.id);
+    } else {
+      // Fallback to direct navigation
+      window.location.href = `/tours/${tour.id}`;
+    }
   };
 
   return (
@@ -206,8 +215,8 @@ export const TourCard = ({ tour }: TourCardProps) => {
               <span className="text-sm text-neutral-500">/person</span>
             </div>
 
-            <Button asChild className="btn-primary">
-              <Link href={`/tours/${tour.id}`}>Book Now</Link>
+            <Button className="btn-primary" onClick={handleBookNow}>
+              Book Now
             </Button>
           </div>
         </div>

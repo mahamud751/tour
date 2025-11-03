@@ -14,9 +14,10 @@ import { cn } from '@/lib/utils';
 
 interface TourDetailsProps {
   tour: Tour;
+  onOpenAuthModal?: () => void;
 }
 
-export const TourDetails = ({ tour }: TourDetailsProps) => {
+export const TourDetails = ({ tour, onOpenAuthModal }: TourDetailsProps) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isLiked, setIsLiked] = useState(false);
 
@@ -204,7 +205,7 @@ export const TourDetails = ({ tour }: TourDetailsProps) => {
             {/* Right Sidebar - Booking Widget */}
             <div className="lg:col-span-1">
               <div className="lg:sticky lg:top-8">
-                <BookingWidget tour={tour} />
+                <BookingWidget tour={tour} onOpenAuthModal={onOpenAuthModal} />
               </div>
             </div>
           </div>

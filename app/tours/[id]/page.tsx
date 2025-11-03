@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { TourDetails } from "@/components/tours/TourDetails";
+import { TourDetailsClient } from "./tour-details-client";
 import { Tour } from "@/types";
 import { TourService } from "@/lib/services/tourService";
 
@@ -30,7 +30,7 @@ export default async function TourPage({ params }: TourPageProps) {
     notFound();
   }
 
-  return <TourDetails tour={tour} />;
+  return <TourDetailsClient tour={tour} />;
 }
 
 // Generate static params for build time

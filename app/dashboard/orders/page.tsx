@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, getSession } from "next-auth/react";
 import {
   Card,
   CardContent,
@@ -45,78 +45,143 @@ export default function OrdersPage() {
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      // Wait for NextAuth to resolve
-      if (status === "loading") return;
+    // Check for NextAuth session
+    if (status === "loading") return;
 
-      // Prefer session token
-      let token: string | null = (session as any)?.token ?? null;
-      if (session?.user && token) {
-        localStorage.setItem("token", token);
-        window.dispatchEvent(new Event("authChange"));
-        setUserRole((session.user as any).role || "USER");
+    // If NextAuth session exists, use it
+    if (session?.user) {
+      setUserRole((session.user as any).role || "USER");
+      return;
+    }
+
+    // If no NextAuth session, check for user data in localStorage (client-side only)
+    if (typeof window !== "undefined") {
+      const userData = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
+      
+      if (userData && token) {
+        const parsedUser = JSON.parse(userData);
+        setUserRole(parsedUser.role || "USER");
+        return;
+      }
+      
+      // If no user data but token exists, validate token
+      if (token) {
+        validateTokenAndGetRole(token);
+        return;
+      }
+    }
+
+    // If no session or token found, redirect to home
+    router.push("/");
+  }, [router, session, status]);
+
+  const validateTokenAndGetRole = async (token: string) => {
+    try {
+      const response = await fetch("/api/auth/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUserRole(userData.role || "USER");
+        
+        // Store user data in localStorage
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
       } else {
+        // Invalid token, remove it and redirect
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        }
+        router.push("/");
+      }
+    } catch (error) {
+      // Error validating token, remove it and redirect
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+      router.push("/");
+    }
+  };
+
+  // Fetch orders when userRole changes
+  useEffect(() => {
+    if (userRole) {
+      fetchOrders();
+    }
+  }, [userRole]);
+
+  const fetchOrders = async () => {
+    try {
+      // Try to get token from session first
+      let token = null;
+      
+      if ((session as any)?.token) {
+        token = (session as any).token;
+      } else if (typeof window !== "undefined") {
+        // Fallback to localStorage token (client-side only)
         token = localStorage.getItem("token");
       }
-
+      
       if (!token) {
         router.push("/");
+        setLoading(false);
         return;
       }
 
-      try {
-        // Fetch user info first
-        const userResponse = await fetch("/api/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      const response = await fetch("/api/orders", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        const userData = await userResponse.json();
+      const data = await response.json();
 
-        if (userResponse.ok) {
-          setUserRole(userData.user.role);
-        } else {
-          localStorage.removeItem("token");
-          router.push("/");
-          return;
-        }
-
-        // Fetch orders
-        const ordersResponse = await fetch("/api/orders", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const ordersData = await ordersResponse.json();
-
-        if (ordersResponse.ok) {
-          setOrders(ordersData.orders);
-        } else {
-          toast.error(ordersData.error || "Failed to fetch orders");
-        }
-      } catch (error) {
-        toast.error("An error occurred while fetching orders");
-      } finally {
-        setLoading(false);
+      if (response.ok) {
+        setOrders(data.orders || []);
+      } else {
+        toast.error(data.error || "Failed to fetch orders");
       }
-    };
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      toast.error("An error occurred while fetching orders");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchOrders();
-  }, [router, session, status]);
+  // If no session or token, redirect (handled by useEffect)
+  if (!session?.user && (typeof window === "undefined" || (!localStorage.getItem("token") && !localStorage.getItem("user")))) {
+    return null;
+  }
 
   const updateOrderStatus = async (
     orderId: string,
     status: "PENDING" | "CONFIRMED" | "CANCELLED"
   ) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/");
-      return;
-    }
-
     try {
+      // First try to get token from NextAuth session
+      const sessionData: any = await getSession();
+      let token = null;
+      
+      if (sessionData?.token) {
+        token = sessionData.token;
+      } else {
+        // Fallback to localStorage token
+        token = localStorage.getItem("token");
+      }
+      
+      if (!token) {
+        router.push("/");
+        return;
+      }
+
       const response = await fetch(`/api/orders/${orderId}`, {
         method: "PUT",
         headers: {
@@ -159,14 +224,6 @@ export default function OrdersPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div>
@@ -174,7 +231,11 @@ export default function OrdersPage() {
         <p className="text-muted-foreground">Manage your tour bookings</p>
       </div>
 
-      {orders.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      ) : orders.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-center">

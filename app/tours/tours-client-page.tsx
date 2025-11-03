@@ -5,6 +5,8 @@ import { useMemo, useState, useEffect } from "react";
 import { ToursGrid } from "@/components/tours/ToursGrid";
 import { ToursFilter } from "@/components/tours/ToursFilter";
 import { Tour } from "@/types";
+import { useSession } from "next-auth/react";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export default function ToursClientPage() {
   const searchParams = useSearchParams();
@@ -17,6 +19,9 @@ export default function ToursClientPage() {
     totalItems: 0,
     itemsPerPage: 6,
   });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const { data: session } = useSession();
 
   const currentPage = parseInt(searchParams.get("page") || "1");
 
@@ -152,6 +157,28 @@ export default function ToursClientPage() {
     fetchTours(page);
   };
 
+  const openAuthModal = (mode: "login" | "register") => {
+    setAuthMode(mode);
+    setIsAuthModalOpen(true);
+  };
+
+  const closeAuthModal = () => {
+    setIsAuthModalOpen(false);
+  };
+
+  const handleBookNow = (tourId: string) => {
+    // Check if user is authenticated
+    const token = localStorage.getItem("token") || (session as any)?.token;
+    
+    if (token) {
+      // User is authenticated, proceed to tour details page
+      window.location.href = `/tours/${tourId}`;
+    } else {
+      // User is not authenticated, open AuthModal
+      openAuthModal("login");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
@@ -164,88 +191,99 @@ export default function ToursClientPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-500 to-primary-600 text-white py-20">
-        <div className="container-custom text-center">
-          <h1 className="heading-primary text-white mb-6">
-            {hasSearchParams ? "Search Results" : "Discover Amazing Tours"}
-          </h1>
-          <p className="body-large text-white/90 max-w-2xl mx-auto">
-            {hasSearchParams
-              ? `Found ${filteredTours.length} tour${
-                  filteredTours.length !== 1 ? "s" : ""
-                } matching your search`
-              : "Explore our handpicked collection of unforgettable adventures. From tropical paradises to mountain expeditions, find your perfect journey."}
-          </p>
-          {hasSearchParams && (
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
-              {searchLocation && (
-                <span className="bg-white/20 px-4 py-2 rounded-full text-sm">
-                  Location: {searchLocation}
-                </span>
-              )}
-              {minPrice > 0 && (
-                <span className="bg-white/20 px-4 py-2 rounded-full text-sm">
-                  Min: ৳{minPrice}
-                </span>
-              )}
-              {maxPrice < Infinity && (
-                <span className="bg-white/20 px-4 py-2 rounded-full text-sm">
-                  Max: ৳{maxPrice}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Main Content */}
-      <section className="section-padding">
-        <div className="container-custom">
-          <div className="grid lg:grid-cols-4 gap-8">
-            {/* Sidebar Filters */}
-            <aside className="lg:col-span-1">
-              <ToursFilter />
-            </aside>
-
-            {/* Tours Grid */}
-            <div className="lg:col-span-3">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h2 className="heading-tertiary">
-                    {hasSearchParams ? "Matching Tours" : "All Tours"}
-                  </h2>
-                  <p className="text-neutral-600">
-                    {filteredTours.length} tour
-                    {filteredTours.length !== 1 ? "s" : ""} available
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <select
-                    className="input-base w-auto"
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                  >
-                    <option value="popular">Sort by: Popular</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="rating">Rating</option>
-                    <option value="duration">Duration</option>
-                  </select>
-                </div>
+    <>
+      <div className="min-h-screen bg-neutral-50">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-br from-primary-500 to-primary-600 text-white py-20">
+          <div className="container-custom text-center">
+            <h1 className="heading-primary text-white mb-6">
+              {hasSearchParams ? "Search Results" : "Discover Amazing Tours"}
+            </h1>
+            <p className="body-large text-white/90 max-w-2xl mx-auto">
+              {hasSearchParams
+                ? `Found ${filteredTours.length} tour${
+                    filteredTours.length !== 1 ? "s" : ""
+                  } matching your search`
+                : "Explore our handpicked collection of unforgettable adventures. From tropical paradises to mountain expeditions, find your perfect journey."}
+            </p>
+            {hasSearchParams && (
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {searchLocation && (
+                  <span className="bg-white/20 px-4 py-2 rounded-full text-sm">
+                    Location: {searchLocation}
+                  </span>
+                )}
+                {minPrice > 0 && (
+                  <span className="bg-white/20 px-4 py-2 rounded-full text-sm">
+                    Min: ৳{minPrice}
+                  </span>
+                )}
+                {maxPrice < Infinity && (
+                  <span className="bg-white/20 px-4 py-2 rounded-full text-sm">
+                    Max: ৳{maxPrice}
+                  </span>
+                )}
               </div>
+            )}
+          </div>
+        </section>
 
-              <ToursGrid
-                tours={filteredTours}
-                currentPage={pagination.currentPage}
-                totalPages={pagination.totalPages}
-                onPageChange={handlePageChange}
-              />
+        {/* Main Content */}
+        <section className="section-padding">
+          <div className="container-custom">
+            <div className="grid lg:grid-cols-4 gap-8">
+              {/* Sidebar Filters */}
+              <aside className="lg:col-span-1">
+                <ToursFilter />
+              </aside>
+
+              {/* Tours Grid */}
+              <div className="lg:col-span-3">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="heading-tertiary">
+                      {hasSearchParams ? "Matching Tours" : "All Tours"}
+                    </h2>
+                    <p className="text-neutral-600">
+                      {filteredTours.length} tour
+                      {filteredTours.length !== 1 ? "s" : ""} available
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <select
+                      className="input-base w-auto"
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                    >
+                      <option value="popular">Sort by: Popular</option>
+                      <option value="price-low">Price: Low to High</option>
+                      <option value="price-high">Price: High to Low</option>
+                      <option value="rating">Rating</option>
+                      <option value="duration">Duration</option>
+                    </select>
+                  </div>
+                </div>
+
+                <ToursGrid
+                  tours={filteredTours}
+                  currentPage={pagination.currentPage}
+                  totalPages={pagination.totalPages}
+                  onPageChange={handlePageChange}
+                  onBookNow={handleBookNow}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+      
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={closeAuthModal}
+        mode={authMode}
+        onModeChange={setAuthMode}
+      />
+    </>
   );
 }

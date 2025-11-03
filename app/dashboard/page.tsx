@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useSession, getSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -24,111 +24,124 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      // Wait for session to resolve before making decisions
-      if (status === "loading") return;
+    // Check for NextAuth session
+    if (status === "loading") return;
 
-      // Prefer NextAuth session token if available
-      let token: string | null = (session as any)?.token ?? null;
-      if (session?.user && token) {
-        // Persist token for API calls and notify app
-        localStorage.setItem("token", token);
-        window.dispatchEvent(new Event("authChange"));
+    // If NextAuth session exists, use it
+    if (session?.user) {
+      const name =
+        (session.user as any).name ||
+        session.user.email?.split("@")[0] ||
+        "User";
+      const role = (session.user as any).role || "USER";
+      setUser({ name, role });
+      fetchOrderStats();
+      return;
+    }
 
-        // Set user info from session immediately
-        const name =
-          (session.user as any).name ||
-          session.user.email?.split("@")[0] ||
-          "User";
-        const role = (session.user as any).role || "USER";
+    // If no NextAuth session, check for user data in localStorage (client-side only)
+    if (typeof window !== "undefined") {
+      const userData = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
+      
+      if (userData && token) {
+        const parsedUser = JSON.parse(userData);
+        const name = parsedUser.name || parsedUser.email?.split("@")[0] || "User";
+        const role = parsedUser.role || "USER";
         setUser({ name, role });
+        fetchOrderStats();
+        return;
+      }
+      
+      // If no user data but token exists, validate token
+      if (token) {
+        validateTokenAndFetchStats(token);
+        return;
+      }
+    }
+
+    // If no session or token found, redirect to home
+    router.push("/");
+  }, [router, session, status]);
+
+  const validateTokenAndFetchStats = async (token: string) => {
+    try {
+      const response = await fetch("/api/auth/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        const name = userData.name || userData.email?.split("@")[0] || "User";
+        const role = userData.role || "USER";
+        setUser({ name, role });
+        fetchOrderStats();
+        
+        // Store user data in localStorage
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
       } else {
-        // Fallback to existing JWT/localStorage flow
+        // Invalid token, remove it and redirect
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        }
+        router.push("/");
+      }
+    } catch (error) {
+      // Error validating token, remove it and redirect
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+      router.push("/");
+    }
+  };
+
+  const fetchOrderStats = async () => {
+    try {
+      // Try to get token from session first
+      let token = null;
+      
+      if ((session as any)?.token) {
+        token = (session as any).token;
+      } else if (typeof window !== "undefined") {
+        // Fallback to localStorage token (client-side only)
         token = localStorage.getItem("token");
       }
-
-      // If we still don't have a token, check if we just came from Google sign-in
-      // In this case, wait a bit for the session to be established
-      if (!token && status === "unauthenticated") {
-        // Wait briefly and check again
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const refreshedSession: any = await getSession();
-        token = refreshedSession?.token ?? null;
-        
-        if (token) {
-          localStorage.setItem("token", token);
-          window.dispatchEvent(new Event("authChange"));
-          
-          // Set user info from session
-          const name =
-            (refreshedSession.user as any).name ||
-            refreshedSession.user.email?.split("@")[0] ||
-            "User";
-          const role = (refreshedSession.user as any).role || "USER";
-          setUser({ name, role });
-        }
-      }
-
+      
       if (!token) {
         router.push("/");
         return;
       }
 
-      try {
-        // Fetch user info if not set from session
-        if (!user) {
-          const userResponse = await fetch("/api/auth/me", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+      const response = await fetch("/api/orders", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-          const userData = await userResponse.json();
-
-          if (userResponse.ok) {
-            setUser(userData.user);
-          } else {
-            localStorage.removeItem("token");
-            router.push("/");
-            return;
-          }
-        }
-
-        // Fetch orders
-        const ordersResponse = await fetch("/api/orders", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      if (response.ok) {
+        const data = await response.json();
+        const orders = data.orders || [];
+        
+        setStats({
+          totalOrders: orders.length,
+          pendingOrders: orders.filter((order: any) => order.status === "PENDING").length,
+          confirmedOrders: orders.filter((order: any) => order.status === "CONFIRMED").length,
         });
-
-        const ordersData = await ordersResponse.json();
-
-        if (ordersResponse.ok) {
-          const orders = ordersData.orders;
-          setStats({
-            totalOrders: orders.length,
-            pendingOrders: orders.filter(
-              (order: any) => order.status === "PENDING"
-            ).length,
-            confirmedOrders: orders.filter(
-              (order: any) => order.status === "CONFIRMED"
-            ).length,
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching order stats:", error);
+    }
+  };
 
-    fetchDashboardData();
-  }, [router, session, status]);
-
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
-      </div>
-    );
+  // If no session or token, redirect (handled by useEffect)
+  if (!session?.user && (typeof window === "undefined" || (!localStorage.getItem("token") && !localStorage.getItem("user")))) {
+    return null;
   }
 
   return (
@@ -136,7 +149,7 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome back, {user.name}! Here's what's happening with your account.
+          Welcome back, {user?.name}! Here's what's happening with your account.
         </p>
       </div>
 
@@ -174,8 +187,8 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">Account Type</CardTitle>
           </CardHeader>
           <CardContent>
-            <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
-              {user.role === "ADMIN" ? "Admin" : "User"}
+            <Badge variant={user?.role === "ADMIN" ? "default" : "secondary"}>
+              {user?.role === "ADMIN" ? "Admin" : "User"}
             </Badge>
           </CardContent>
         </Card>

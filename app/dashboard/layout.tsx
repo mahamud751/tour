@@ -7,21 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Package2, Users, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { useSession, signOut as nextAuthSignOut, getSession } from "next-auth/react";
-
-// Custom hook to handle token synchronization
-const useTokenSync = (session: any) => {
-  useEffect(() => {
-    if (session?.token && typeof window !== 'undefined') {
-      const existingToken = localStorage.getItem("token");
-      if (!existingToken || existingToken !== session.token) {
-        localStorage.setItem("token", session.token);
-        window.dispatchEvent(new Event("authChange"));
-      }
-    }
-  }, [session]);
-};
-
+import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 
 export default function DashboardLayout({
   children,
@@ -32,125 +18,85 @@ export default function DashboardLayout({
   const { data: session, status } = useSession();
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Sync token when session changes
-  useTokenSync(session);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      // Wait for session to resolve before making redirect decisions
-      if (status === "loading") {
-        return;
-      }
+    // Check for NextAuth session
+    if (status === "loading") return;
 
-      // Check for NextAuth session first
-      let currentSession = session;
-      if (!currentSession) {
-        currentSession = await getSession();
-      }
+    // If NextAuth session exists, use it
+    if (session?.user) {
+      const name =
+        (session.user as any).name ||
+        session.user.email?.split("@")[0] ||
+        "User";
+      const role = (session.user as any).role || "USER";
+      setUser({ name, role });
+      return;
+    }
 
-      // If NextAuth session exists, use it
-      if (currentSession?.user) {
-        const name =
-          (currentSession.user as any).name ||
-          currentSession.user.email?.split("@")[0] ||
-          "User";
-        const role = (currentSession.user as any).role || "USER";
-        setUser({ name, role });
-
-        // Check if token exists in session
-        const token = (currentSession as any).token;
-        if (token) {
-          localStorage.setItem("token", token);
-          window.dispatchEvent(new Event("authChange"));
-        }
-        
-        setIsLoading(false);
-        return;
-      }
-
-      // Fallback to JWT token check
+    // If no NextAuth session, check for token in localStorage (client-side only)
+    if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
-      if (!token) {
-        router.push("/");
-        setIsLoading(false);
+      if (token) {
+        // Validate token and get user info
+        validateToken(token);
         return;
       }
+    }
 
-      try {
-        const response = await fetch("/api/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-        } else {
-          // Token is invalid, clear it and redirect
-          localStorage.removeItem("token");
-          router.push("/");
-        }
-      } catch (error) {
-        localStorage.removeItem("token");
-        router.push("/");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
+    // If no session or token found, redirect to home
+    router.push("/");
   }, [router, session, status]);
 
-  // Add event listener for auth changes
-  useEffect(() => {
-    const handleAuthChange = () => {
-      const token = localStorage.getItem("token");
-      if (!token && !session) {
+  const validateToken = async (token: string) => {
+    try {
+      const response = await fetch("/api/auth/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        const name = userData.name || userData.email?.split("@")[0] || "User";
+        const role = userData.role || "USER";
+        setUser({ name, role });
+      } else {
+        // Invalid token, remove it and redirect
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        }
         router.push("/");
       }
-    };
-
-    window.addEventListener("authChange", handleAuthChange);
-    return () => {
-      window.removeEventListener("authChange", handleAuthChange);
-    };
-  }, [router, session]);
-
-  // Show loading state
-  if (status === "loading" || isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  // Don't render if no user (will redirect)
-  if (!user) {
-    return null;
-  }
+    } catch (error) {
+      // Error validating token, remove it and redirect
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+      router.push("/");
+    }
+  };
 
   const handleLogout = () => {
-    // Clear both authentication methods
-    localStorage.removeItem("token");
+    // Clear localStorage token and user data if they exist (client-side only)
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
     
-    // Sign out from NextAuth if session exists
+    // Sign out from NextAuth
     if (session) {
       nextAuthSignOut({ callbackUrl: "/" });
     } else {
-      // If no NextAuth session, just redirect
-      toast.success("Logged out successfully");
-      window.dispatchEvent(new Event("authChange"));
       router.push("/");
       router.refresh();
     }
   };
 
   const navItems =
-    user.role === "ADMIN"
+    user?.role === "ADMIN"
       ? [
           { name: "Dashboard", href: "/dashboard", icon: Package2 },
           { name: "All Orders", href: "/dashboard/orders", icon: Users },
@@ -161,6 +107,11 @@ export default function DashboardLayout({
           { name: "My Orders", href: "/dashboard/orders", icon: Users },
           { name: "Profile", href: "/dashboard/profile", icon: User },
         ];
+
+  // If no session or token, redirect (handled by useEffect)
+  if (!session?.user && (typeof window === "undefined" || !localStorage.getItem("token"))) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -254,12 +205,12 @@ export default function DashboardLayout({
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
           <div className="w-full flex-1">
             <h1 className="text-lg font-semibold md:text-2xl">
-              Welcome, {user.name}
+              Welcome, {user?.name}
             </h1>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">
-              {user.role === "ADMIN" ? "Admin" : "User"}
+              {user?.role === "ADMIN" ? "Admin" : "User"}
             </span>
           </div>
         </header>

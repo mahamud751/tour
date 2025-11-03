@@ -6,12 +6,14 @@ import { TourCard } from "@/components/shared/TourCard";
 import { Pagination } from "@/components/shared/Pagination";
 import { Button } from "@/components/ui/button";
 import { Tour } from "@/types";
+import { useSession } from "next-auth/react";
 
 interface ToursGridProps {
   tours?: Tour[];
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
+  onBookNow?: (tourId: string) => void;
 }
 
 export const ToursGrid = ({
@@ -19,8 +21,10 @@ export const ToursGrid = ({
   currentPage = 1,
   totalPages = 1,
   onPageChange,
+  onBookNow,
 }: ToursGridProps) => {
   const [tours, setTours] = useState<Tour[]>(initialTours || []);
+  const { data: session } = useSession();
 
   // Update tours when initialTours prop changes
   useEffect(() => {
@@ -34,7 +38,7 @@ export const ToursGrid = ({
       {/* Tours Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {tours.map((tour) => (
-          <TourCard key={tour.id} tour={tour} />
+          <TourCard key={tour.id} tour={tour} onBookNow={onBookNow} />
         ))}
       </div>
 
