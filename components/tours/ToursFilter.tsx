@@ -20,7 +20,7 @@ export const ToursFilter = () => {
   const [filters, setFilters] = useState({
     priceRange: [
       parseInt(searchParams.get("minPrice") || "100"),
-      parseInt(searchParams.get("maxPrice") || "2000"),
+      parseInt(searchParams.get("maxPrice") || "10000"),
     ],
     duration: [] as string[],
     rating: 0,
@@ -101,7 +101,7 @@ export const ToursFilter = () => {
 
   const clearAllFilters = () => {
     const clearedFilters = {
-      priceRange: [100, 2000],
+      priceRange: [100, 10000],
       duration: [],
       rating: 0,
       amenities: [],
@@ -198,13 +198,13 @@ export const ToursFilter = () => {
                   onValueChange={handlePriceChange}
                   onValueCommit={handlePriceChangeComplete}
                   min={100}
-                  max={2000}
+                  max={10000}
                   step={50}
                   className="my-6"
                 />
                 <div className="flex items-center justify-between text-sm text-neutral-600">
-                  <span>${filters.priceRange[0]}</span>
-                  <span>${filters.priceRange[1]}</span>
+                  <span>৳{filters.priceRange[0]}</span>
+                  <span>৳{filters.priceRange[1]}</span>
                 </div>
               </div>
             </div>

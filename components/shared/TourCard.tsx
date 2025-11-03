@@ -50,7 +50,7 @@ export const TourCard = ({ tour }: TourCardProps) => {
     offers: {
       "@type": "Offer",
       price: price,
-      priceCurrency: "USD",
+      priceCurrency: "BDT",
       availability: "https://schema.org/InStock",
     },
     location: {
@@ -201,7 +201,7 @@ export const TourCard = ({ tour }: TourCardProps) => {
           <div className="flex items-center justify-between pt-4 border-t border-neutral-200 mt-auto">
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-heading font-bold text-primary-600">
-                ${price}
+                ৳{price}
               </span>
               <span className="text-sm text-neutral-500">/person</span>
             </div>

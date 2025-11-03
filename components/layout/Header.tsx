@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,6 +23,7 @@ const Header = () => {
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
   const [isClient, setIsClient] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -60,6 +62,28 @@ const Header = () => {
     };
   }, []);
 
+  // Bridge NextAuth session into existing JWT/localStorage flow and UI
+  useEffect(() => {
+    if (!isClient) return;
+    if (session?.user) {
+      // Prefer NextAuth session user for immediate UI display
+      const name =
+        (session.user as any).name ||
+        session.user.email?.split("@")[0] ||
+        "User";
+      const role = (session.user as any).role || "USER";
+      setUser({ name, role });
+
+      // Persist our JWT from NextAuth session for existing API calls
+      const token = (session as any).token;
+      if (token) {
+        localStorage.setItem("token", token);
+        // Notify other parts of the app
+        window.dispatchEvent(new Event("authChange"));
+      }
+    }
+  }, [session, isClient]);
+
   const fetchCurrentUser = async (token: string) => {
     try {
       const response = await fetch("/api/auth/me", {
@@ -90,6 +114,9 @@ const Header = () => {
     if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
       window.location.href = "/";
     }
+
+    // Also sign out NextAuth session if present
+    nextAuthSignOut({ callbackUrl: "/" });
   };
 
   const openAuthModal = (mode: "login" | "register") => {

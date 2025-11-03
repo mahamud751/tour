@@ -139,7 +139,7 @@ export default function AdminToursPage() {
               </CardHeader>
               <CardContent className="flex-1">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold">${tour.price}</span>
+                  <span className="text-lg font-bold">৳{tour.price}</span>
                   <div className="flex gap-2">
                     <Button
                       size="sm"

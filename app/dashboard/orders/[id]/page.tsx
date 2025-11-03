@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   Card,
   CardContent,
@@ -37,6 +38,7 @@ export default function UserOrderDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const orderId = params.id as string;
+  const { data: session, status } = useSession();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,13 +47,24 @@ export default function UserOrderDetailsPage() {
     if (orderId) {
       fetchOrderDetails();
     }
-  }, [orderId]);
+  }, [orderId, session, status]);
 
   const fetchOrderDetails = async () => {
     try {
-      const token = localStorage.getItem("token");
+      // Wait for NextAuth session state to resolve
+      if (status === "loading") return;
+
+      // Prefer NextAuth session token
+      let token: string | null = (session as any)?.token ?? null;
+      if (session?.user && token) {
+        localStorage.setItem("token", token);
+        window.dispatchEvent(new Event("authChange"));
+      } else {
+        token = localStorage.getItem("token");
+      }
+
       if (!token) {
-        router.push("/login");
+        router.push("/");
         return;
       }
 
@@ -202,14 +215,14 @@ export default function UserOrderDetailsPage() {
 
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="text-muted-foreground">Price per person</div>
-                <div>${order.tour.price.toFixed(2)}</div>
+                <div>৳{order.tour.price.toFixed(2)}</div>
 
                 <div className="text-muted-foreground">Total guests</div>
                 <div>{order.guestSize}</div>
 
                 <div className="text-muted-foreground">Total amount</div>
                 <div className="font-semibold">
-                  ${order.totalPrice.toFixed(2)}
+                  ৳{order.totalPrice.toFixed(2)}
                 </div>
               </div>
 

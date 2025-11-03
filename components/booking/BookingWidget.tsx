@@ -29,7 +29,7 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [bookingData, setBookingData] = useState({
     date: '',
-    guests: '1',
+    guests: '5',
     fullName: '',
     email: '',
     phone: '',
@@ -39,7 +39,7 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
   
   console.log("Tour price:", price, "Max group size:", maxGroupSize);
 
-  const guestOptions = Array.from({ length: maxGroupSize }, (_, i) => (i + 1).toString());
+  const guestOptions = Array.from({ length: maxGroupSize - 4 }, (_, i) => (i + 5).toString());
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,7 +184,7 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
         <div className="text-center p-4 bg-primary-50 rounded-lg">
           <div className="flex items-baseline justify-center gap-2">
             <span className="text-3xl font-heading font-bold text-primary-600">
-              ${price}
+              ৳{price}
             </span>
             <span className="text-neutral-600">per person</span>
           </div>
@@ -228,7 +228,7 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
               <SelectContent>
                 {guestOptions.map((num) => (
                   <SelectItem key={num} value={num}>
-                    {num} {num === '1' ? 'Guest' : 'Guests'}
+                    {num} {num === '5' ? 'Guests (Minimum)' : 'Guests'}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -280,16 +280,16 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
           {/* Total Price */}
           <div className="p-4 bg-neutral-50 rounded-lg space-y-2">
             <div className="flex justify-between text-sm">
-              <span>${price} × {bookingData.guests} guests</span>
-              <span>${price * parseInt(bookingData.guests)}</span>
+              <span>৳{price} × {bookingData.guests} guests</span>
+              <span>৳{price * parseInt(bookingData.guests)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Service fee</span>
-              <span>$49</span>
+              <span>৳49</span>
             </div>
             <div className="flex justify-between font-semibold text-lg border-t border-neutral-200 pt-2">
               <span>Total</span>
-              <span className="text-primary-600">${totalPrice}</span>
+              <span className="text-primary-600">৳{totalPrice}</span>
             </div>
           </div>
 
@@ -305,7 +305,7 @@ export const BookingWidget = ({ tour }: BookingWidgetProps) => {
                 Processing Booking...
               </>
             ) : (
-              `Book Now · $${totalPrice}`
+              `Book Now · ৳${totalPrice}`
             )}
           </Button>
 

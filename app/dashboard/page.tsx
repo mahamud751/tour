@@ -11,9 +11,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useSession, getSession } from "next-auth/react";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
   const [stats, setStats] = useState({
     totalOrders: 0,
@@ -23,28 +25,73 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      const token = localStorage.getItem("token");
+      // Wait for session to resolve before making decisions
+      if (status === "loading") return;
+
+      // Prefer NextAuth session token if available
+      let token: string | null = (session as any)?.token ?? null;
+      if (session?.user && token) {
+        // Persist token for API calls and notify app
+        localStorage.setItem("token", token);
+        window.dispatchEvent(new Event("authChange"));
+
+        // Set user info from session immediately
+        const name =
+          (session.user as any).name ||
+          session.user.email?.split("@")[0] ||
+          "User";
+        const role = (session.user as any).role || "USER";
+        setUser({ name, role });
+      } else {
+        // Fallback to existing JWT/localStorage flow
+        token = localStorage.getItem("token");
+      }
+
+      // If we still don't have a token, check if we just came from Google sign-in
+      // In this case, wait a bit for the session to be established
+      if (!token && status === "unauthenticated") {
+        // Wait briefly and check again
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const refreshedSession: any = await getSession();
+        token = refreshedSession?.token ?? null;
+        
+        if (token) {
+          localStorage.setItem("token", token);
+          window.dispatchEvent(new Event("authChange"));
+          
+          // Set user info from session
+          const name =
+            (refreshedSession.user as any).name ||
+            refreshedSession.user.email?.split("@")[0] ||
+            "User";
+          const role = (refreshedSession.user as any).role || "USER";
+          setUser({ name, role });
+        }
+      }
+
       if (!token) {
-        router.push("/login");
+        router.push("/");
         return;
       }
 
       try {
-        // Fetch user info
-        const userResponse = await fetch("/api/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        // Fetch user info if not set from session
+        if (!user) {
+          const userResponse = await fetch("/api/auth/me", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
-        const userData = await userResponse.json();
+          const userData = await userResponse.json();
 
-        if (userResponse.ok) {
-          setUser(userData.user);
-        } else {
-          localStorage.removeItem("token");
-          router.push("/login");
-          return;
+          if (userResponse.ok) {
+            setUser(userData.user);
+          } else {
+            localStorage.removeItem("token");
+            router.push("/");
+            return;
+          }
         }
 
         // Fetch orders
@@ -74,7 +121,7 @@ export default function DashboardPage() {
     };
 
     fetchDashboardData();
-  }, [router]);
+  }, [router, session, status]);
 
   if (!user) {
     return (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   Card,
   CardContent,
@@ -23,6 +24,7 @@ interface User {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -33,9 +35,29 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      const token = localStorage.getItem("token");
+      // Wait for NextAuth to resolve
+      if (status === "loading") return;
+
+      // Prefer NextAuth session token
+      let token: string | null = (session as any)?.token ?? null;
+      if (session?.user && token) {
+        localStorage.setItem("token", token);
+        window.dispatchEvent(new Event("authChange"));
+        setUser({
+          id: (session.user as any).id,
+          name:
+            (session.user as any).name ||
+            session.user.email?.split("@")[0] ||
+            "User",
+          email: session.user.email || "",
+          role: (session.user as any).role || "USER",
+        });
+      } else {
+        token = localStorage.getItem("token");
+      }
+
       if (!token) {
-        router.push("/login");
+        router.push("/");
         return;
       }
 
@@ -56,7 +78,7 @@ export default function ProfilePage() {
           });
         } else {
           localStorage.removeItem("token");
-          router.push("/login");
+          router.push("/");
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -67,14 +89,14 @@ export default function ProfilePage() {
     };
 
     fetchUserProfile();
-  }, [router]);
+  }, [router, session, status]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/login");
+      router.push("/");
       return;
     }
 

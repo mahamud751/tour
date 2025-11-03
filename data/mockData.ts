@@ -84,7 +84,7 @@ export const mockTours: Tour[] = [
     description:
       "Experience the world's longest sea beach and vibrant coastal culture of Cox's Bazar. Relax on golden sands, explore nearby islands, and savor fresh seafood in this ultimate beach getaway.",
     photo: "/images/tour/01.jpg", // Cox's Bazar beach
-    price: 300,
+    price: 3000,
     city: "Cox's Bazar",
     address: "Marine Drive, Cox's Bazar",
     distance: "2km from center",
@@ -119,11 +119,11 @@ export const mockTours: Tour[] = [
     description:
       "Venture into the UNESCO-listed Sundarbans mangrove forest for thrilling tiger safaris and boat cruises. Discover biodiversity hotspots and eco-adventures in Bangladesh's natural wonder.",
     photo: "/images/tour/02.jpg", // Sundarbans mangroves
-    price: 200,
+    price: 2500,
     city: "Khulna",
     address: "Sundarbans National Park",
     distance: "10km from entry point",
-    maxGroupSize: 12,
+    maxGroupSize: 15,
     reviews: [
       {
         id: "3",
@@ -146,11 +146,11 @@ export const mockTours: Tour[] = [
     description:
       "Immerse in the lush tea estates and misty hills of Sylhet. Trek through rolling gardens, visit waterfalls, and experience the serene beauty of Northeast Bangladesh.",
     photo: "/images/tour/03.jpg", // Tea gardens
-    price: 220,
+    price: 2000,
     city: "Sylhet",
     address: "Sreemangal Tea Estate",
     distance: "5km from center",
-    maxGroupSize: 10,
+    maxGroupSize: 15,
     reviews: [
       {
         id: "4",
@@ -173,11 +173,11 @@ export const mockTours: Tour[] = [
     description:
       "Trek through the remote hills of Sajek Valley in the Chittagong Hill Tracts. Enjoy panoramic views, tribal villages, and cloud-kissed landscapes in this offbeat paradise.",
     photo: "/images/tour/04.jpg", // Hill valleys (adapt for Sajek)
-    price: 400,
+    price: 2500,
     city: "Khagrachari",
     address: "Sajek Valley, Chittagong Hill Tracts",
     distance: "3km from base camp",
-    maxGroupSize: 20,
+    maxGroupSize: 15,
     reviews: [
       {
         id: "5",
@@ -200,7 +200,7 @@ export const mockTours: Tour[] = [
     description:
       "Escape to Bangladesh's only coral island, St. Martin's, for snorkeling in turquoise waters, beachcombing, and island hopping. A slice of tropical serenity.",
     photo: "/images/tour/05.jpg", // Coral island beach
-    price: 550,
+    price: 3500,
     city: "Teknaf",
     address: "St. Martin's Island",
     distance: "1km from jetty",
@@ -227,11 +227,11 @@ export const mockTours: Tour[] = [
     description:
       "Explore the rugged hills of Bandarban with jeep safaris, bamboo boating on lakes, and visits to indigenous communities. Adventure awaits in the Chittagong Hills.",
     photo: "/images/tour/06.jpg", // Hill country
-    price: 300,
+    price: 2000,
     city: "Bandarban",
     address: "Nilgiri Hills",
     distance: "4km from center",
-    maxGroupSize: 18,
+    maxGroupSize: 15,
     reviews: [
       {
         id: "7",

@@ -56,7 +56,7 @@ export default function ToursClientPage() {
     : 100;
   const maxPrice = searchParams.get("maxPrice")
     ? parseInt(searchParams.get("maxPrice")!)
-    : 2000;
+    : 10000;
   const durationFilter = searchParams.get("duration") || "";
   const tourTypeFilter = searchParams.get("tourType") || "";
   const minRating = searchParams.get("rating")
@@ -142,7 +142,7 @@ export default function ToursClientPage() {
   const hasSearchParams =
     searchLocation ||
     minPrice > 100 ||
-    maxPrice < 2000 ||
+    maxPrice < 10000 ||
     durationFilter ||
     tourTypeFilter ||
     minRating > 0;
@@ -187,12 +187,12 @@ export default function ToursClientPage() {
               )}
               {minPrice > 0 && (
                 <span className="bg-white/20 px-4 py-2 rounded-full text-sm">
-                  Min: ${minPrice}
+                  Min: ৳{minPrice}
                 </span>
               )}
               {maxPrice < Infinity && (
                 <span className="bg-white/20 px-4 py-2 rounded-full text-sm">
-                  Max: ${maxPrice}
+                  Max: ৳{maxPrice}
                 </span>
               )}
             </div>

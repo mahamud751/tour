@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 
 export default function AdminLayout({
   children,
@@ -22,17 +23,43 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
+      if (status === "loading") return;
+
+      // If NextAuth session exists, prefer it
+      if (session?.user) {
+        const role = (session.user as any).role || "USER";
+        if (role !== "ADMIN") {
+          console.log("Admin layout - User not admin, redirecting to dashboard");
+          router.push("/dashboard");
+          toast.error("Access denied. Admin access required.");
+          return;
+        }
+        const name =
+          (session.user as any).name ||
+          session.user.email?.split("@")[0] ||
+          "User";
+        setUser({ name, role });
+
+        const token = (session as any).token;
+        if (token) {
+          localStorage.setItem("token", token);
+          window.dispatchEvent(new Event("authChange"));
+        }
+        return;
+      }
+
       const token = localStorage.getItem("token");
       console.log("Admin layout - Token from localStorage:", token);
 
       if (!token) {
-        console.log("Admin layout - No token found, redirecting to login");
-        router.push("/login");
+        console.log("Admin layout - No token found, redirecting to home");
+        router.push("/");
         return;
       }
 
@@ -60,31 +87,34 @@ export default function AdminLayout({
           setUser(data.user);
         } else {
           console.log(
-            "Admin layout - Auth API failed, removing token and redirecting to login"
+            "Admin layout - Auth API failed, removing token and redirecting to home"
           );
           localStorage.removeItem("token");
-          router.push("/login");
+          router.push("/");
         }
       } catch (error) {
         console.log(
-          "Admin layout - Auth API error, removing token and redirecting to login",
+          "Admin layout - Auth API error, removing token and redirecting to home",
           error
         );
         localStorage.removeItem("token");
-        router.push("/login");
+        router.push("/");
       }
     };
 
     fetchUser();
-  }, [router]);
+  }, [router, session, status]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     toast.success("Logged out successfully");
     // Dispatch auth change event
     window.dispatchEvent(new Event("authChange"));
-    router.push("/login");
+    router.push("/");
     router.refresh();
+
+    // Sign out NextAuth if present
+    nextAuthSignOut({ callbackUrl: "/" });
   };
 
   if (!user) {

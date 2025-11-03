@@ -132,7 +132,7 @@ export default function OrdersPage() {
                       <td className="py-3 px-4">
                         {getStatusBadge(order.status)}
                       </td>
-                      <td className="py-3 px-4">${order.totalAmount}</td>
+                      <td className="py-3 px-4">৳{order.totalAmount}</td>
                       <td className="py-3 px-4">
                         {format(new Date(order.createdAt), "MMM dd, yyyy")}
                       </td>

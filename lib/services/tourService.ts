@@ -135,4 +135,65 @@ export class TourService {
       throw error;
     }
   }
+
+  static async updateAllTours() {
+    try {
+      // Define the updated tour data based on mockTours
+      const updatedTours = [
+        {
+          id: "1",
+          title: "Cox's Bazar Beach Paradise",
+          price: 3000,
+          maxGroupSize: 15,
+        },
+        {
+          id: "2",
+          title: "Sundarbans Wildlife Expedition",
+          price: 2500,
+          maxGroupSize: 15,
+        },
+        {
+          id: "3",
+          title: "Sylhet Tea Gardens Journey",
+          price: 2000,
+          maxGroupSize: 15,
+        },
+        {
+          id: "4",
+          title: "Sajek Valley Hill Trek",
+          price: 2500,
+          maxGroupSize: 15,
+        },
+        {
+          id: "5",
+          title: "St. Martin's Island Coral Escape",
+          price: 3500,
+          maxGroupSize: 15,
+        },
+        {
+          id: "6",
+          title: "Bandarban Hill Country Adventure",
+          price: 2000,
+          maxGroupSize: 15,
+        },
+      ];
+
+      // Update each tour
+      for (const updatedTour of updatedTours) {
+        await prisma.tour.update({
+          where: { id: updatedTour.id },
+          data: {
+            price: updatedTour.price,
+            maxGroupSize: updatedTour.maxGroupSize,
+          },
+        });
+      }
+
+      console.log("All tours updated successfully");
+      return true;
+    } catch (error) {
+      console.error("Error updating tours:", error);
+      throw error;
+    }
+  }
 }

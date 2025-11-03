@@ -24,7 +24,35 @@ export class AuthService {
       });
 
       if (existingUser) {
-        throw new Error("User already exists");
+        // If user exists but has no password (OAuth user), update with password
+        if (!existingUser.password) {
+          const hashedPassword = await bcrypt.hash(data.password, 10);
+          const updatedUser = await prisma.user.update({
+            where: { id: existingUser.id },
+            data: {
+              name: data.name,
+              password: hashedPassword,
+            },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              createdAt: true,
+            },
+          });
+
+          // Generate JWT token
+          const token = jwt.sign(
+            { userId: updatedUser.id, email: updatedUser.email, role: updatedUser.role },
+            process.env.JWT_SECRET || "fallback_secret",
+            { expiresIn: "7d" }
+          );
+
+          return { user: updatedUser, token };
+        } else {
+          throw new Error("User already exists");
+        }
       }
 
       // Hash password
@@ -71,7 +99,12 @@ export class AuthService {
         throw new Error("Invalid credentials");
       }
 
-      // Check password
+      // Check if user signed up with OAuth (no password)
+      if (!user.password) {
+        throw new Error("Please sign in with Google");
+      }
+
+      // Check password for email/password users
       const isPasswordValid = await bcrypt.compare(
         data.password,
         user.password

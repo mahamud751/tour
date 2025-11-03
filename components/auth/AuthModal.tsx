@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { signIn, getSession } from "next-auth/react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { FcGoogle } from "react-icons/fc";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -29,6 +31,7 @@ export const AuthModal = ({
 }: AuthModalProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -116,6 +119,32 @@ export const AuthModal = ({
     }
   };
 
+const handleGoogleSignIn = async () => {
+  setIsGoogleLoading(true);
+  try {
+    const result = await signIn("google", {
+      callbackUrl: "/dashboard",
+      redirect: true, // Changed to true to ensure proper redirect
+    });
+
+    if (result?.error) {
+      toast.error("Google sign in failed");
+      return;
+    }
+
+    // With redirect: true, the user will be redirected automatically
+    // The dashboard page will handle token retrieval and storage
+    toast.success("Google sign in successful!");
+    onClose();
+  } catch (error) {
+    console.error("Google Sign-In Error:", error);
+    toast.error("An error occurred during Google sign in");
+  } finally {
+    setIsGoogleLoading(false);
+  }
+};
+
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
@@ -130,88 +159,116 @@ export const AuthModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {mode === "register" && (
+        <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {mode === "register" && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="John Doe"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required={mode === "register"}
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="name"
-                name="name"
-                type="text"
-                placeholder="John Doe"
-                value={formData.name}
+                id="email"
+                name="email"
+                type="email"
+                placeholder="name@example.com"
+                value={formData.email}
                 onChange={handleChange}
-                required={mode === "register"}
+                required
               />
             </div>
-          )}
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="name@example.com"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {mode === "register" && (
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
-                id="confirmPassword"
-                name="confirmPassword"
+                id="password"
+                name="password"
                 type="password"
-                placeholder="Confirm your password"
-                value={formData.confirmPassword}
+                placeholder="Enter your password"
+                value={formData.password}
                 onChange={handleChange}
-                required={mode === "register"}
+                required
               />
             </div>
-          )}
 
-          <div className="flex flex-col gap-2 pt-2">
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading
-                ? mode === "login"
-                  ? "Signing in..."
-                  : "Creating account..."
-                : mode === "login"
-                ? "Sign in"
-                : "Create account"}
-            </Button>
+            {mode === "register" && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="Confirm your password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required={mode === "register"}
+                />
+              </div>
+            )}
 
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() =>
-                onModeChange(mode === "login" ? "register" : "login")
-              }
-              className="w-full"
-            >
-              {mode === "login"
-                ? "Don't have an account? Register"
-                : "Already have an account? Login"}
-            </Button>
+            <div className="flex flex-col gap-2 pt-2">
+              <Button type="submit" disabled={isLoading} className="w-full">
+                {isLoading
+                  ? mode === "login"
+                    ? "Signing in..."
+                    : "Creating account..."
+                  : mode === "login"
+                  ? "Sign in"
+                  : "Create account"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() =>
+                  onModeChange(mode === "login" ? "register" : "login")
+                }
+                className="w-full"
+              >
+                {mode === "login"
+                  ? "Don't have an account? Register"
+                  : "Already have an account? Login"}
+              </Button>
+            </div>
+          </form>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
           </div>
-        </form>
+
+          <Button
+            variant="outline"
+            type="button"
+            disabled={isGoogleLoading}
+            onClick={handleGoogleSignIn}
+            className="w-full"
+          >
+            {isGoogleLoading ? (
+              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            ) : (
+              <FcGoogle className="mr-2 h-4 w-4" />
+            )}
+            Continue with Google
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

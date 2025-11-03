@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   Card,
   CardContent,
@@ -38,15 +39,28 @@ interface Order {
 
 export default function OrdersPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const token = localStorage.getItem("token");
+      // Wait for NextAuth to resolve
+      if (status === "loading") return;
+
+      // Prefer session token
+      let token: string | null = (session as any)?.token ?? null;
+      if (session?.user && token) {
+        localStorage.setItem("token", token);
+        window.dispatchEvent(new Event("authChange"));
+        setUserRole((session.user as any).role || "USER");
+      } else {
+        token = localStorage.getItem("token");
+      }
+
       if (!token) {
-        router.push("/login");
+        router.push("/");
         return;
       }
 
@@ -64,7 +78,7 @@ export default function OrdersPage() {
           setUserRole(userData.user.role);
         } else {
           localStorage.removeItem("token");
-          router.push("/login");
+          router.push("/");
           return;
         }
 
@@ -90,7 +104,7 @@ export default function OrdersPage() {
     };
 
     fetchOrders();
-  }, [router]);
+  }, [router, session, status]);
 
   const updateOrderStatus = async (
     orderId: string,
@@ -98,7 +112,7 @@ export default function OrdersPage() {
   ) => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/login");
+      router.push("/");
       return;
     }
 
@@ -219,7 +233,7 @@ export default function OrdersPage() {
                       <div>{order.id}</div>
 
                       <div className="text-muted-foreground">Total Price</div>
-                      <div>${order.totalPrice.toFixed(2)}</div>
+                      <div>৳{order.totalPrice.toFixed(2)}</div>
 
                       <div className="text-muted-foreground">Booked At</div>
                       <div>

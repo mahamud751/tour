@@ -267,14 +267,14 @@ export default function AdminOrderDetailsPage() {
 
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="text-muted-foreground">Price per person</div>
-                <div>${order.tour.price.toFixed(2)}</div>
+                <div>৳{order.tour.price.toFixed(2)}</div>
 
                 <div className="text-muted-foreground">Total guests</div>
                 <div>{order.guestSize}</div>
 
                 <div className="text-muted-foreground">Total amount</div>
                 <div className="font-semibold">
-                  ${order.totalPrice.toFixed(2)}
+                  ৳{order.totalPrice.toFixed(2)}
                 </div>
               </div>
 

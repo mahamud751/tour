@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { BackToTop } from "@/components/shared/BackToTop";
+import AuthSessionProvider from "@/components/providers/AuthSessionProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,6 +19,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
   title: {
     default: "Next Go - Go where your heart roams",
     template: "%s | Next Go - Go where your heart roams",
@@ -36,14 +38,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://nextgo.com", // Replace with your actual domain
+    url: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
     title: "Next Go - Go where your heart roams",
     description:
       "Your travel starts with Next Go. Fly. Explore. Next Go. Book amazing tours and create unforgettable memories.",
     siteName: "Next Go",
     images: [
       {
-        url: "/images/og-image.jpg", // You'll need to add this image
+        url: "/images/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Next Go - Go where your heart roams",
@@ -55,7 +57,7 @@ export const metadata: Metadata = {
     title: "Next Go - Go where your heart roams",
     description:
       "Your travel starts with Next Go. Fly. Explore. Next Go. Book amazing tours and create unforgettable memories.",
-    images: ["/images/og-image.jpg"], // You'll need to add this image
+    images: ["/images/og-image.jpg"],
   },
   robots: {
     index: true,
@@ -69,7 +71,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://nextgo.com", // Replace with your actual domain
+    canonical: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
   },
 };
 
@@ -81,11 +83,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${poppins.variable} font-sans`}>
-        <div className="min-h-screen flex flex-col">
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
+        <AuthSessionProvider>
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+        </AuthSessionProvider>
 
         {/* Back to Top Button */}
         <BackToTop />
